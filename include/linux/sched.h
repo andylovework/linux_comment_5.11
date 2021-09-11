@@ -79,14 +79,14 @@ struct task_group;
  */
 
 /* Used in tsk->state: */
-#define TASK_RUNNING			0x0000
-#define TASK_INTERRUPTIBLE		0x0001
-#define TASK_UNINTERRUPTIBLE		0x0002
+#define TASK_RUNNING			0x0000  /* 运行中 */
+#define TASK_INTERRUPTIBLE		0x0001 /* 等待中，可以被信号唤醒 */
+#define TASK_UNINTERRUPTIBLE		0x0002 /* 等待中，不可以被信号唤醒，wake up 才能唤醒 */
 #define __TASK_STOPPED			0x0004
 #define __TASK_TRACED			0x0008
 /* Used in tsk->exit_state: */
-#define EXIT_DEAD			0x0010
-#define EXIT_ZOMBIE			0x0020
+#define EXIT_DEAD			0x0010 /* 16：死亡 */
+#define EXIT_ZOMBIE			0x0020 /* 32：僵死 */
 #define EXIT_TRACE			(EXIT_ZOMBIE | EXIT_DEAD)
 /* Used in tsk->state again: */
 #define TASK_PARKED			0x0040

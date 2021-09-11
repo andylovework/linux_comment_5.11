@@ -53,19 +53,19 @@ struct pt_regs;
  * @name:		flow handler name for /proc/interrupts output
  */
 struct irq_desc {
-	struct irq_common_data	irq_common_data;
+	struct irq_common_data	irq_common_data; /* 中断号 */
 	struct irq_data		irq_data;
-	unsigned int __percpu	*kstat_irqs;
-	irq_flow_handler_t	handle_irq;
-	struct irqaction	*action;	/* IRQ action list */
+	unsigned int __percpu	*kstat_irqs; /* 每个CPU的中断状态 */
+	irq_flow_handler_t	handle_irq; /* 高级中断处理 */
+	struct irqaction	*action;	/* IRQ action list：IRQ服务列表*/
 	unsigned int		status_use_accessors;
 	unsigned int		core_internal_state__do_not_mess_with_it;
-	unsigned int		depth;		/* nested irq disables */
-	unsigned int		wake_depth;	/* nested wake enables */
+	unsigned int		depth;		/* nested irq disables 禁止深度，用于irq_disable()*/
+	unsigned int		wake_depth;	/* nested wake enables 允许深度，用于set_irq_wake() */
 	unsigned int		tot_count;
 	unsigned int		irq_count;	/* For detecting broken IRQs */
 	unsigned long		last_unhandled;	/* Aging timer for unhandled count */
-	unsigned int		irqs_unhandled;
+	unsigned int		irqs_unhandled; /* 未处理的中断 */
 	atomic_t		threads_handled;
 	int			threads_handled_last;
 	raw_spinlock_t		lock;
@@ -88,7 +88,7 @@ struct irq_desc {
 	unsigned int		force_resume_depth;
 #endif
 #ifdef CONFIG_PROC_FS
-	struct proc_dir_entry	*dir;
+	struct proc_dir_entry	*dir; /* proc路径 */
 #endif
 #ifdef CONFIG_GENERIC_IRQ_DEBUGFS
 	struct dentry		*debugfs_file;
@@ -101,7 +101,7 @@ struct irq_desc {
 	struct mutex		request_mutex;
 	int			parent_irq;
 	struct module		*owner;
-	const char		*name;
+	const char		*name; /* 名称 */
 } ____cacheline_internodealigned_in_smp;
 
 #ifdef CONFIG_SPARSE_IRQ

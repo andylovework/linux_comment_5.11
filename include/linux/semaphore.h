@@ -27,7 +27,7 @@ struct semaphore {
 
 #define DEFINE_SEMAPHORE(name)	\
 	struct semaphore name = __SEMAPHORE_INITIALIZER(name, 1)
-
+/* 初始化信号量 */
 static inline void sema_init(struct semaphore *sem, int val)
 {
 	static struct lock_class_key __key;

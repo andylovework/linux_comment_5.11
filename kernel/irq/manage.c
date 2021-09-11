@@ -718,7 +718,7 @@ EXPORT_SYMBOL(disable_irq_nosync);
  *	holding a resource the IRQ handler may need you will deadlock.
  *
  *	This function may be called - with care - from IRQ context.
- */
+ */ /* 禁止单个中断，等待成功返回 */
 void disable_irq(unsigned int irq)
 {
 	if (!__disable_irq_nosync(irq))
@@ -805,7 +805,7 @@ void __enable_irq(struct irq_desc *desc)
  *
  *	This function may be called from IRQ context only when
  *	desc->irq_data.chip->bus_lock and desc->chip->bus_sync_unlock are NULL !
- */
+ */ /* 允许单个中断 */
 void enable_irq(unsigned int irq)
 {
 	unsigned long flags;

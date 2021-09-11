@@ -469,8 +469,8 @@ struct dev_links_info {
  * a higher-level representation of the device.
  */
 struct device {
-	struct kobject kobj;
-	struct device		*parent;
+	struct kobject kobj; /* 关联的内核签证 */
+	struct device		*parent; /* 父设备 */
 
 	struct device_private	*p;
 

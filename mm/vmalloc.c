@@ -2651,7 +2651,7 @@ static void __vfree(const void *addr)
  * Must not be called in NMI context (strictly speaking, it could be
  * if we have CONFIG_ARCH_HAVE_NMI_SAFE_CMPXCHG, but making the calling
  * conventions for vfree() arch-dependent would be a really bad idea).
- */
+ */ /* 释放由vmalloc分配内存 */
 void vfree(const void *addr)
 {
 	BUG_ON(in_nmi());
@@ -3095,7 +3095,7 @@ EXPORT_SYMBOL(vzalloc);
  * without leaking data.
  *
  * Return: pointer to the allocated memory or %NULL on error
- */
+ */ /* 为用户空间分配内存 */
 void *vmalloc_user(unsigned long size)
 {
 	return __vmalloc_node_range(size, SHMLBA,  VMALLOC_START, VMALLOC_END,

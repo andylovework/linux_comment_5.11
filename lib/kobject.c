@@ -345,7 +345,7 @@ EXPORT_SYMBOL(kobject_set_name);
  * After this function is called, the kobject MUST be cleaned up by a call
  * to kobject_put(), not by a call to kfree directly to ensure that all of
  * the memory is cleaned up properly.
- */
+ */ /* 初始化kobject */
 void kobject_init(struct kobject *kobj, struct kobj_type *ktype)
 {
 	char *err_str;

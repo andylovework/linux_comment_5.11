@@ -50,22 +50,22 @@ struct notifier_block;		/* in notifier.h */
 #endif
 
 struct vm_struct {
-	struct vm_struct	*next;
-	void			*addr;
-	unsigned long		size;
-	unsigned long		flags;
-	struct page		**pages;
+	struct vm_struct	*next; /* 指向下一虚拟地址，加速查询 */
+	void			*addr; /* 地址 */
+	unsigned long		size; /* 大小 */
+	unsigned long		flags; /* 标志 */
+	struct page		**pages; /* 页指针 */
 #ifdef CONFIG_HAVE_ARCH_HUGE_VMALLOC
 	unsigned int		page_order;
 #endif
 	unsigned int		nr_pages;
-	phys_addr_t		phys_addr;
+	phys_addr_t		phys_addr; /* 物理地址 */
 	const void		*caller;
 };
 
 struct vmap_area {
-	unsigned long va_start;
-	unsigned long va_end;
+	unsigned long va_start; /* 起始地址 */
+	unsigned long va_end; /* 结束地址 */
 
 	struct rb_node rb_node;         /* address sorted rbtree */
 	struct list_head list;          /* address sorted list */

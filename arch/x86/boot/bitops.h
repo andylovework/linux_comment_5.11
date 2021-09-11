@@ -35,7 +35,7 @@ static inline bool variable_test_bit(int nr, const void *addr)
 (__builtin_constant_p(nr) ? \
  constant_test_bit((nr),(addr)) : \
  variable_test_bit((nr),(addr)))
-
+/* 对给定地址addr的第nr bit进行配置 */
 static inline void set_bit(int nr, void *addr)
 {
 	asm("btsl %1,%0" : "+m" (*(u32 *)addr) : "Ir" (nr));

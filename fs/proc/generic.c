@@ -475,7 +475,7 @@ struct proc_dir_entry *proc_symlink(const char *name,
 	return ent;
 }
 EXPORT_SYMBOL(proc_symlink);
-
+/* 创建一个proc目录，name指定要创建proc目录名称，parent为proc所在目录 */
 struct proc_dir_entry *_proc_mkdir(const char *name, umode_t mode,
 		struct proc_dir_entry *parent, void *data, bool force_lookup)
 {
@@ -560,7 +560,7 @@ static inline void pde_set_flags(struct proc_dir_entry *pde)
 	if (pde->proc_ops->proc_flags & PROC_ENTRY_PERMANENT)
 		pde->flags |= PROC_ENTRY_PERMANENT;
 }
-
+/* 比proc_create多一个参数data，用于填充proc_dir_entry结构的data成员 */
 struct proc_dir_entry *proc_create_data(const char *name, umode_t mode,
 		struct proc_dir_entry *parent,
 		const struct proc_ops *proc_ops, void *data)
@@ -575,7 +575,7 @@ struct proc_dir_entry *proc_create_data(const char *name, umode_t mode,
 	return proc_register(parent, p);
 }
 EXPORT_SYMBOL(proc_create_data);
- 
+/* 创建proc目录，name为文件名称，mode为文件权限，parent为文件父目录的指针 */ 
 struct proc_dir_entry *proc_create(const char *name, umode_t mode,
 				   struct proc_dir_entry *parent,
 				   const struct proc_ops *proc_ops)
@@ -680,6 +680,7 @@ void pde_put(struct proc_dir_entry *pde)
 /*
  * Remove a /proc entry and free it if it's not currently in use.
  */
+/* 用于删除parent目录下为name的proc条目，parent为NULL表示父目录为/proc */
 void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
 {
 	struct proc_dir_entry *de = NULL;

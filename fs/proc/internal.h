@@ -38,7 +38,7 @@ struct proc_dir_entry {
 	/* protects ->pde_openers and all struct pde_opener instances */
 	spinlock_t pde_unload_lock;
 	struct completion *pde_unload_completion;
-	const struct inode_operations *proc_iops;
+	const struct inode_operations *proc_iops; /* 节点操作*/
 	union {
 		const struct proc_ops *proc_ops;
 		const struct file_operations *proc_dir_ops;
@@ -53,11 +53,11 @@ struct proc_dir_entry {
 	unsigned int state_size;
 	unsigned int low_ino;
 	nlink_t nlink;
-	kuid_t uid;
-	kgid_t gid;
+	kuid_t uid; /*用户*/
+	kgid_t gid; /*用户组*/
 	loff_t size;
-	struct proc_dir_entry *parent;
-	struct rb_root subdir;
+	struct proc_dir_entry *parent; /* 父路径 */
+	struct rb_root subdir; 
 	struct rb_node subdir_node;
 	char *name;
 	umode_t mode;

@@ -2020,30 +2020,31 @@ struct dir_context {
 struct iov_iter;
 
 struct file_operations {
-	struct module *owner;
-	loff_t (*llseek) (struct file *, loff_t, int);
-	ssize_t (*read) (struct file *, char __user *, size_t, loff_t *);
-	ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *);
-	ssize_t (*read_iter) (struct kiocb *, struct iov_iter *);
-	ssize_t (*write_iter) (struct kiocb *, struct iov_iter *);
-	int (*iopoll)(struct kiocb *kiocb, bool spin);
+	struct module *owner; /* 模块所有者 */
+	loff_t (*llseek) (struct file *, loff_t, int); /* 寻找文件读写位置 */
+	ssize_t (*read) (struct file *, char __user *, size_t, loff_t *); /* 读 */
+	ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *); /* 写 */
+	ssize_t (*read_iter) (struct kiocb *, struct iov_iter *); /* 多缓冲读 */
+	ssize_t (*write_iter) (struct kiocb *, struct iov_iter *); /* 多缓冲写 */
+	int (*iopoll)(struct kiocb *kiocb, bool spin); /* 查询可读性 */
 	int (*iterate) (struct file *, struct dir_context *);
 	int (*iterate_shared) (struct file *, struct dir_context *);
 	__poll_t (*poll) (struct file *, struct poll_table_struct *);
-	long (*unlocked_ioctl) (struct file *, unsigned int, unsigned long);
+	long (*unlocked_ioctl) (struct file *, unsigned int, unsigned long); /* 未加锁的控制接口 */
+	/* 在64位系统上处理32位的ioctl调用 */
 	long (*compat_ioctl) (struct file *, unsigned int, unsigned long);
-	int (*mmap) (struct file *, struct vm_area_struct *);
+	int (*mmap) (struct file *, struct vm_area_struct *); /* 内存映射 */
 	unsigned long mmap_supported_flags;
-	int (*open) (struct inode *, struct file *);
-	int (*flush) (struct file *, fl_owner_t id);
-	int (*release) (struct inode *, struct file *);
-	int (*fsync) (struct file *, loff_t, loff_t, int datasync);
-	int (*fasync) (int, struct file *, int);
-	int (*lock) (struct file *, int, struct file_lock *);
-	ssize_t (*sendpage) (struct file *, struct page *, int, size_t, loff_t *, int);
-	unsigned long (*get_unmapped_area)(struct file *, unsigned long, unsigned long, unsigned long, unsigned long);
-	int (*check_flags)(int);
-	int (*flock) (struct file *, int, struct file_lock *);
+	int (*open) (struct inode *, struct file *); /* 打开设备 */
+	int (*flush) (struct file *, fl_owner_t id); /* 执行未完成的操作 */
+	int (*release) (struct inode *, struct file *); /* 释放 */
+	int (*fsync) (struct file *, loff_t, loff_t, int datasync); /* 刷新待处理的数据 */
+	int (*fasync) (int, struct file *, int); /* 通知设备FASYNC标志发生变化 */
+	int (*lock) (struct file *, int, struct file_lock *); /* 文件锁 */
+	ssize_t (*sendpage) (struct file *, struct page *, int, size_t, loff_t *, int);/* 发送数据，一次一页 */
+	unsigned long (*get_unmapped_area)(struct file *, unsigned long, unsigned long, unsigned long, unsigned long); /* 获取未映射区 */
+	int (*check_flags)(int); /* 检查传递给fcntl(fd, F_SETEL...)调用的标记 */
+	int (*flock) (struct file *, int, struct file_lock *); /* 另一种文件锁 */
 	ssize_t (*splice_write)(struct pipe_inode_info *, struct file *, loff_t *, size_t, unsigned int);
 	ssize_t (*splice_read)(struct file *, loff_t *, struct pipe_inode_info *, size_t, unsigned int);
 	int (*setlease)(struct file *, long, struct file_lock **, void **);
@@ -2069,27 +2070,21 @@ struct inode_operations {
 
 	int (*readlink) (struct dentry *, char __user *,int);
 
-	int (*create) (struct user_namespace *, struct inode *,struct dentry *,
-		       umode_t, bool);
-	int (*link) (struct dentry *,struct inode *,struct dentry *);
-	int (*unlink) (struct inode *,struct dentry *);
-	int (*symlink) (struct user_namespace *, struct inode *,struct dentry *,
-			const char *);
-	int (*mkdir) (struct user_namespace *, struct inode *,struct dentry *,
-		      umode_t);
-	int (*rmdir) (struct inode *,struct dentry *);
-	int (*mknod) (struct user_namespace *, struct inode *,struct dentry *,
-		      umode_t,dev_t);
+	int (*create) (struct user_namespace *, struct inode *,struct dentry *, umode_t, bool); /* 创建 */
+	int (*link) (struct dentry *,struct inode *,struct dentry *); /* 硬链接 */
+	int (*unlink) (struct inode *,struct dentry *); /* 取消链接 */
+	int (*symlink) (struct user_namespace *, struct inode *,struct dentry *, const char *); /* 软链接 */
+	int (*mkdir) (struct user_namespace *, struct inode *,struct dentry *, umode_t); /* 创建目录 */
+	int (*rmdir) (struct inode *,struct dentry *); /* 删除目录 */
+	int (*mknod) (struct user_namespace *, struct inode *,struct dentry *, umode_t,dev_t); /* 创建节点 */
 	int (*rename) (struct user_namespace *, struct inode *, struct dentry *,
-			struct inode *, struct dentry *, unsigned int);
-	int (*setattr) (struct user_namespace *, struct dentry *,
-			struct iattr *);
+			struct inode *, struct dentry *, unsigned int); /* 重命名 */
+	int (*setattr) (struct user_namespace *, struct dentry *, struct iattr *);
 	int (*getattr) (struct user_namespace *, const struct path *,
 			struct kstat *, u32, unsigned int);
 	ssize_t (*listxattr) (struct dentry *, char *, size_t);
-	int (*fiemap)(struct inode *, struct fiemap_extent_info *, u64 start,
-		      u64 len);
-	int (*update_time)(struct inode *, struct timespec64 *, int);
+	int (*fiemap)(struct inode *, struct fiemap_extent_info *, u64 start, u64 len);
+	int (*update_time)(struct inode *, struct timespec64 *, int); /* 更新时间 */
 	int (*atomic_open)(struct inode *, struct dentry *,
 			   struct file *, unsigned open_flag,
 			   umode_t create_mode);

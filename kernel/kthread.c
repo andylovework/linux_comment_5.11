@@ -632,7 +632,7 @@ EXPORT_SYMBOL_GPL(kthread_park);
  *
  * Returns the result of threadfn(), or %-EINTR if wake_up_process()
  * was never called.
- */
+ */ /* 结束内核线程 */
 int kthread_stop(struct task_struct *k)
 {
 	struct kthread *kthread;

@@ -115,11 +115,11 @@ typedef irqreturn_t (*irq_handler_t)(int, void *);
  * @dir:	pointer to the proc/irq/NN/name entry
  */
 struct irqaction {
-	irq_handler_t		handler;
+	irq_handler_t		handler; /* 设备中断处理函数 */
 	void			*dev_id;
 	void __percpu		*percpu_dev_id;
 	struct irqaction	*next;
-	irq_handler_t		thread_fn;
+	irq_handler_t		thread_fn; /* 中断后处理线程 */
 	struct task_struct	*thread;
 	struct irqaction	*secondary;
 	unsigned int		irq;
@@ -127,7 +127,7 @@ struct irqaction {
 	unsigned long		thread_flags;
 	unsigned long		thread_mask;
 	const char		*name;
-	struct proc_dir_entry	*dir;
+	struct proc_dir_entry	*dir; /* proc路径 */
 } ____cacheline_internodealigned_in_smp;
 
 extern irqreturn_t no_action(int cpl, void *dev_id);
@@ -584,12 +584,12 @@ static inline struct task_struct *this_cpu_ksoftirqd(void)
 
 struct tasklet_struct
 {
-	struct tasklet_struct *next;
-	unsigned long state;
-	atomic_t count;
+	struct tasklet_struct *next; /* 队列指针 */
+	unsigned long state; /* tasklet的状态 */
+	atomic_t count; /* 引用计数，通常用1表示disabled */
 	bool use_callback;
 	union {
-		void (*func)(unsigned long data);
+		void (*func)(unsigned long data); /* 执行函数指针 */
 		void (*callback)(struct tasklet_struct *t);
 	};
 	unsigned long data;

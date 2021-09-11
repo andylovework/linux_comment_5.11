@@ -5420,7 +5420,7 @@ EXPORT_SYMBOL(__alloc_pages);
  * Common helper functions. Never use with __GFP_HIGHMEM because the returned
  * address cannot represent highmem pages. Use alloc_pages and then kmap if
  * you need to access high mem.
- */
+ */ /* 直接获取整页的内存 */
 unsigned long __get_free_pages(gfp_t gfp_mask, unsigned int order)
 {
 	struct page *page;
@@ -5431,7 +5431,7 @@ unsigned long __get_free_pages(gfp_t gfp_mask, unsigned int order)
 	return (unsigned long) page_address(page);
 }
 EXPORT_SYMBOL(__get_free_pages);
-
+/* 返回一个单个的，零填充的页 */
 unsigned long get_zeroed_page(gfp_t gfp_mask)
 {
 	return __get_free_pages(gfp_mask | __GFP_ZERO, 0);
@@ -5457,7 +5457,7 @@ EXPORT_SYMBOL(get_zeroed_page);
  *
  * Context: May be called in interrupt context or while holding a normal
  * spinlock, but not in NMI context or while holding a raw spinlock.
- */
+ */ /* 释放面向页分配的函数 */
 void __free_pages(struct page *page, unsigned int order)
 {
 	if (put_page_testzero(page))

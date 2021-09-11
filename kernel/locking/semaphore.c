@@ -49,7 +49,7 @@ static noinline void __up(struct semaphore *sem);
  *
  * Use of this function is deprecated, please use down_interruptible() or
  * down_killable() instead.
- */
+ */ /* 获得信号量 */
 void down(struct semaphore *sem)
 {
 	unsigned long flags;
@@ -174,7 +174,7 @@ EXPORT_SYMBOL(down_timeout);
  *
  * Release the semaphore.  Unlike mutexes, up() may be called from any
  * context and even by tasks which have never called down().
- */
+ */ /* 释放信号量，唤醒等待者 */
 void up(struct semaphore *sem)
 {
 	unsigned long flags;

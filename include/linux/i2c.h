@@ -319,6 +319,7 @@ struct i2c_driver {
  * managing the device.
  */
 struct i2c_client {
+    /* I2C_CLIENT_TEN表示10位地址；I2C_CLIENT_PEC表示使用SMBUS包错误检查 */
 	unsigned short flags;		/* div., see below		*/
 #define I2C_CLIENT_PEC		0x04	/* Use Packet Error Checking */
 #define I2C_CLIENT_TEN		0x10	/* we have a ten bit chip address */
@@ -329,19 +330,19 @@ struct i2c_client {
 #define I2C_CLIENT_SCCB		0x9000	/* Use Omnivision SCCB protocol */
 					/* Must match I2C_M_STOP|IGNORE_NAK */
 
-	unsigned short addr;		/* chip address - NOTE: 7bit	*/
+	unsigned short addr;		/* chip address - NOTE: 7bit：7位芯片地址	*/
 					/* addresses are stored in the	*/
 					/* _LOWER_ 7 bits		*/
 	char name[I2C_NAME_SIZE];
-	struct i2c_adapter *adapter;	/* the adapter we sit on	*/
-	struct device dev;		/* the device structure		*/
+	struct i2c_adapter *adapter;	/* the adapter we sit on关联的adapter	*/
+	struct device dev;		/* the device structure	设备结构	*/
 	int init_irq;			/* irq set at initialization	*/
-	int irq;			/* irq issued by device		*/
+	int irq;			/* irq issued by device	中断号	*/
 	struct list_head detected;
 #if IS_ENABLED(CONFIG_I2C_SLAVE)
 	i2c_slave_cb_t slave_cb;	/* callback for slave mode	*/
 #endif
-	void *devres_group_id;		/* ID of probe devres group	*/
+	void *devres_group_id;		/* ID of probe devres group从模式回调	*/
 };
 #define to_i2c_client(d) container_of(d, struct i2c_client, dev)
 
@@ -541,12 +542,12 @@ struct i2c_algorithm {
 	 * processed, or a negative value on error
 	 */
 	int (*master_xfer)(struct i2c_adapter *adap, struct i2c_msg *msgs,
-			   int num);
+			   int num); /* I2C总线传输函数 */
 	int (*master_xfer_atomic)(struct i2c_adapter *adap,
 				   struct i2c_msg *msgs, int num);
 	int (*smbus_xfer)(struct i2c_adapter *adap, u16 addr,
 			  unsigned short flags, char read_write,
-			  u8 command, int size, union i2c_smbus_data *data);
+			  u8 command, int size, union i2c_smbus_data *data); /* SMBUS总线传输 */
 	int (*smbus_xfer_atomic)(struct i2c_adapter *adap, u16 addr,
 				 unsigned short flags, char read_write,
 				 u8 command, int size, union i2c_smbus_data *data);
@@ -711,7 +712,7 @@ struct i2c_adapter_quirks {
 struct i2c_adapter {
 	struct module *owner;
 	unsigned int class;		  /* classes to allow probing for */
-	const struct i2c_algorithm *algo; /* the algorithm to access the bus */
+	const struct i2c_algorithm *algo; /* the algorithm to access the bus 总线访问算法*/
 	void *algo_data;
 
 	/* data fields that are valid for all devices	*/
@@ -719,14 +720,14 @@ struct i2c_adapter {
 	struct rt_mutex bus_lock;
 	struct rt_mutex mux_lock;
 
-	int timeout;			/* in jiffies */
-	int retries;
-	struct device dev;		/* the adapter device */
+	int timeout;			/* in jiffies 超时时间，单位同jiffies*/
+	int retries; /* 重试次数  */
+	struct device dev;		/* the adapter device 适配器设备*/
 	unsigned long locked_flags;	/* owned by the I2C core */
 #define I2C_ALF_IS_SUSPENDED		0
 #define I2C_ALF_SUSPEND_REPORTED	1
 
-	int nr;
+	int nr; /* 总线 */
 	char name[48];
 	struct completion dev_released;
 
@@ -734,7 +735,7 @@ struct i2c_adapter {
 	struct list_head userspace_clients;
 
 	struct i2c_bus_recovery_info *bus_recovery_info;
-	const struct i2c_adapter_quirks *quirks;
+	const struct i2c_adapter_quirks *quirks; /* i2c适配器的缺陷或限制 */
 
 	struct irq_domain *host_notify_domain;
 	struct regulator *bus_regulator;

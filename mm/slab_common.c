@@ -414,7 +414,7 @@ EXPORT_SYMBOL(kmem_cache_create_usercopy);
  * as davem.
  *
  * Return: a pointer to the cache on success, NULL on failure.
- */
+ */  /* 用来创建slab */
 struct kmem_cache *
 kmem_cache_create(const char *name, unsigned int size, unsigned int align,
 		slab_flags_t flags, void (*ctor)(void *))
@@ -494,7 +494,7 @@ void slab_kmem_cache_release(struct kmem_cache *s)
 	kfree_const(s->name);
 	kmem_cache_free(kmem_cache, s);
 }
-
+/* 用于销毁salb缓冲 */
 void kmem_cache_destroy(struct kmem_cache *s)
 {
 	int err;

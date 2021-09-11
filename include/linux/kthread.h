@@ -23,7 +23,7 @@ struct task_struct *kthread_create_on_node(int (*threadfn)(void *data),
  * This macro will create a kthread on the current node, leaving it in
  * the stopped state.  This is just a helper for kthread_create_on_node();
  * see the documentation there for more details.
- */
+ */ /* 创建内核线程 */
 #define kthread_create(threadfn, data, namefmt, arg...) \
 	kthread_create_on_node(threadfn, data, NUMA_NO_NODE, namefmt, ##arg)
 
@@ -46,7 +46,7 @@ bool kthread_is_per_cpu(struct task_struct *k);
  *
  * Description: Convenient wrapper for kthread_create() followed by
  * wake_up_process().  Returns the kthread or ERR_PTR(-ENOMEM).
- */
+ */ /* 创建并唤醒一个线程 */
 #define kthread_run(threadfn, data, namefmt, ...)			   \
 ({									   \
 	struct task_struct *__k						   \

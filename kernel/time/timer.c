@@ -1838,7 +1838,7 @@ static void process_timeout(struct timer_list *t)
  * Returns 0 when the timer has expired otherwise the remaining time in
  * jiffies will be returned. In all cases the return value is guaranteed
  * to be non-negative.
- */
+ */  /* 带超时的调度 */
 signed long __sched schedule_timeout(signed long timeout)
 {
 	struct process_timer timer;

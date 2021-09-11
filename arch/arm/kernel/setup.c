@@ -1107,7 +1107,7 @@ void __init setup_arch(char **cmdline_p)
 
 	setup_processor();
 	if (atags_vaddr) {
-		mdesc = setup_machine_fdt(atags_vaddr);
+		mdesc = setup_machine_fdt(atags_vaddr); /* 建立设备树 */
 		if (mdesc)
 			memblock_reserve(__atags_pointer,
 					 fdt_totalsize(atags_vaddr));
@@ -1167,7 +1167,7 @@ void __init setup_arch(char **cmdline_p)
 		register_restart_handler(&arm_restart_nb);
 	}
 
-	unflatten_device_tree();
+	unflatten_device_tree(); /* 扫描设备树，将设备树组织成device_node结构用于后面的解析信息 */
 
 	arm_dt_init_cpu_maps();
 	psci_dt_init();

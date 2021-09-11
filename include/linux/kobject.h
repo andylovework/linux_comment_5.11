@@ -62,13 +62,13 @@ enum kobject_action {
 };
 
 struct kobject {
-	const char		*name;
+	const char		*name; /* 名称 */
 	struct list_head	entry;
-	struct kobject		*parent;
-	struct kset		*kset;
-	struct kobj_type	*ktype;
-	struct kernfs_node	*sd; /* sysfs directory entry */
-	struct kref		kref;
+	struct kobject		*parent; /* 父对象 */
+	struct kset		*kset; /* 所属的kset */
+	struct kobj_type	*ktype; /* 对象的类型 */
+	struct kernfs_node	*sd; /* sysfs 目录项 */
+	struct kref		kref; /* 引用计数 */
 #ifdef CONFIG_DEBUG_KOBJECT_RELEASE
 	struct delayed_work	release;
 #endif
@@ -76,7 +76,7 @@ struct kobject {
 	unsigned int state_in_sysfs:1;
 	unsigned int state_add_uevent_sent:1;
 	unsigned int state_remove_uevent_sent:1;
-	unsigned int uevent_suppress:1;
+	unsigned int uevent_suppress:1; /* 是否发送uevent事件 */
 };
 
 extern __printf(2, 3)
@@ -93,12 +93,12 @@ static inline const char *kobject_name(const struct kobject *kobj)
 extern void kobject_init(struct kobject *kobj, struct kobj_type *ktype);
 extern __printf(3, 4) __must_check
 int kobject_add(struct kobject *kobj, struct kobject *parent,
-		const char *fmt, ...);
+		const char *fmt, ...); /* 将kobject加入到系统 */
 extern __printf(4, 5) __must_check
 int kobject_init_and_add(struct kobject *kobj,
 			 struct kobj_type *ktype, struct kobject *parent,
-			 const char *fmt, ...);
-
+			 const char *fmt, ...); 
+/* 将kobject从系统中删除 */
 extern void kobject_del(struct kobject *kobj);
 
 extern struct kobject * __must_check kobject_create(void);
@@ -107,10 +107,11 @@ extern struct kobject * __must_check kobject_create_and_add(const char *name,
 
 extern int __must_check kobject_rename(struct kobject *, const char *new_name);
 extern int __must_check kobject_move(struct kobject *, struct kobject *);
-
+/* 增加对象引用次数 */
 extern struct kobject *kobject_get(struct kobject *kobj);
 extern struct kobject * __must_check kobject_get_unless_zero(
 						struct kobject *kobj);
+/* 减少对象引用次数 */
 extern void kobject_put(struct kobject *kobj);
 
 extern const void *kobject_namespace(struct kobject *kobj);
@@ -137,8 +138,8 @@ static inline bool kobject_has_children(struct kobject *kobj)
 
 struct kobj_type {
 	void (*release)(struct kobject *kobj);
-	const struct sysfs_ops *sysfs_ops;
-	struct attribute **default_attrs;	/* use default_groups instead */
+	const struct sysfs_ops *sysfs_ops; /* sysfs操作 */
+	struct attribute **default_attrs;	/* use default_groups instead默认属性 */
 	const struct attribute_group **default_groups;
 	const struct kobj_ns_type_operations *(*child_ns_type)(struct kobject *kobj);
 	const void *(*namespace)(struct kobject *kobj);
@@ -190,10 +191,10 @@ struct sock;
  * desired.
  */
 struct kset {
-	struct list_head list;
-	spinlock_t list_lock;
-	struct kobject kobj;
-	const struct kset_uevent_ops *uevent_ops;
+	struct list_head list; /* 同一kset的链表 */
+	spinlock_t list_lock; /* 锁 */
+	struct kobject kobj; /* 自身的kobject */
+	const struct kset_uevent_ops *uevent_ops; /* uevent相关操作，如时间过滤等 */
 } __randomize_layout;
 
 extern void kset_init(struct kset *kset);

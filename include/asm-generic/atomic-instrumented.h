@@ -20,7 +20,7 @@
 #include <linux/build_bug.h>
 #include <linux/compiler.h>
 #include <linux/instrumented.h>
-
+/* 原子读操作 */
 static __always_inline int
 atomic_read(const atomic_t *v)
 {
@@ -34,7 +34,7 @@ atomic_read_acquire(const atomic_t *v)
 	instrument_atomic_read(v, sizeof(*v));
 	return arch_atomic_read_acquire(v);
 }
-
+/* 设置原子类型的变量v的值为i */
 static __always_inline void
 atomic_set(atomic_t *v, int i)
 {
@@ -48,7 +48,7 @@ atomic_set_release(atomic_t *v, int i)
 	instrument_atomic_write(v, sizeof(*v));
 	arch_atomic_set_release(v, i);
 }
-
+/* 给原子类型的变量v增加值i */
 static __always_inline void
 atomic_add(int i, atomic_t *v)
 {
@@ -111,7 +111,7 @@ atomic_fetch_add_relaxed(int i, atomic_t *v)
 	instrument_atomic_read_write(v, sizeof(*v));
 	return arch_atomic_fetch_add_relaxed(i, v);
 }
-
+/* 给原子类型的变量v减去值i */
 static __always_inline void
 atomic_sub(int i, atomic_t *v)
 {

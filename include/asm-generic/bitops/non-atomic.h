@@ -12,7 +12,7 @@
  * Unlike set_bit(), this function is non-atomic and may be reordered.
  * If it's called on the same region of memory simultaneously, the effect
  * may be that only one operation succeeds.
- */
+ */ /* 对给定地址addr的第nr bit进行置位 */
 static inline void __set_bit(int nr, volatile unsigned long *addr)
 {
 	unsigned long mask = BIT_MASK(nr);
@@ -20,7 +20,7 @@ static inline void __set_bit(int nr, volatile unsigned long *addr)
 
 	*p  |= mask;
 }
-
+/* 对给定地址addr的第nr bit进行清位 */
 static inline void __clear_bit(int nr, volatile unsigned long *addr)
 {
 	unsigned long mask = BIT_MASK(nr);
@@ -37,7 +37,7 @@ static inline void __clear_bit(int nr, volatile unsigned long *addr)
  * Unlike change_bit(), this function is non-atomic and may be reordered.
  * If it's called on the same region of memory simultaneously, the effect
  * may be that only one operation succeeds.
- */
+ */ /* 使地址addr的第nr bit发生跳转(0变成为1，1变成0) */
 static inline void __change_bit(int nr, volatile unsigned long *addr)
 {
 	unsigned long mask = BIT_MASK(nr);
@@ -100,7 +100,7 @@ static inline int __test_and_change_bit(int nr,
  * test_bit - Determine whether a bit is set
  * @nr: bit number to test
  * @addr: Address to start counting from
- */
+ */ /* 检测给定的地址addr的第nr bit的值 */
 static inline int test_bit(int nr, const volatile unsigned long *addr)
 {
 	return 1UL & (addr[BIT_WORD(nr)] >> (nr & (BITS_PER_LONG-1)));
