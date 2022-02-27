@@ -132,21 +132,21 @@ struct gendisk {
 	/* major, first_minor and minors are input parameters only,
 	 * don't use directly.  Use disk_devt() and disk_max_parts().
 	 */
-	int major;			/* major number of driver */
-	int first_minor;
-	int minors;                     /* maximum number of minors, =1 for
-                                         * disks that can't be partitioned. */
+	int major;			/* major number of driver 主设备号*/
+	int first_minor; /* 第一个此设备号 */
+	/* 次设备号最大数量，代表可分区数量 */
+	int minors; /* maximum number of minors, =1 for disks that can't be partitioned. */
 
-	char disk_name[DISK_NAME_LEN];	/* name of major driver */
+	char disk_name[DISK_NAME_LEN];	/* name of major driver 主驱动器名 */
 
-	unsigned short events;		/* supported events */
-	unsigned short event_flags;	/* flags related to event processing */
+	unsigned short events;		/* supported events 支持的事件 */
+	unsigned short event_flags;	/* flags related to event processing 异步事件 */
 
 	struct xarray part_tbl;
 	struct block_device *part0;
 
-	const struct block_device_operations *fops;
-	struct request_queue *queue;
+	const struct block_device_operations *fops; /* 块设备操作接口 */
+	struct request_queue *queue; /* 请求队列 */
 	void *private_data;
 
 	int flags;
@@ -161,7 +161,7 @@ struct gendisk {
 	struct kobject *slave_dir;
 
 	struct timer_rand_state *random;
-	atomic_t sync_io;		/* RAID */
+	atomic_t sync_io;		/* 用于RAID */
 	struct disk_events *ev;
 #ifdef  CONFIG_BLK_DEV_INTEGRITY
 	struct kobject integrity_kobj;

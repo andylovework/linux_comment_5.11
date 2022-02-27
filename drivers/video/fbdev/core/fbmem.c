@@ -1809,9 +1809,8 @@ EXPORT_SYMBOL(remove_conflicting_pci_framebuffers);
  *
  *	Returns negative errno on error, or zero for success.
  *
- */
-int
-register_framebuffer(struct fb_info *fb_info)
+ */ /* 注册 */
+int register_framebuffer(struct fb_info *fb_info)
 {
 	int ret;
 
@@ -1838,9 +1837,8 @@ EXPORT_SYMBOL(register_framebuffer);
  *      function. If this is called outside module_exit(), ensure
  *      that the driver implements fb_open() and fb_release() to
  *      check that no processes are using the device.
- */
-void
-unregister_framebuffer(struct fb_info *fb_info)
+ */ /* 注销 */
+void unregister_framebuffer(struct fb_info *fb_info)
 {
 	mutex_lock(&registration_lock);
 	do_unregister_framebuffer(fb_info);

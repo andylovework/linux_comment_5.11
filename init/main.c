@@ -1098,7 +1098,7 @@ asmlinkage __visible void __init __no_sanitize_address start_kernel(void)
 	key_init();
 	security_init();
 	dbg_late_init();
-	vfs_caches_init();
+	vfs_caches_init(); /* 初始化文件系统 */
 	pagecache_init();
 	signals_init();
 	seq_file_init();

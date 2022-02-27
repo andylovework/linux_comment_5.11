@@ -228,62 +228,62 @@ struct fb_deferred_io {
 struct fb_ops {
 	/* open/release and usage marking */
 	struct module *owner;
-	int (*fb_open)(struct fb_info *info, int user);
-	int (*fb_release)(struct fb_info *info, int user);
+	int (*fb_open)(struct fb_info *info, int user); /* 打开 */
+	int (*fb_release)(struct fb_info *info, int user); /* 释放 */
 
 	/* For framebuffers with strange non linear layouts or that do not
 	 * work with normal memory mapped access
-	 */
+	 */ /* 为不支持mmap的设备提供的读写接口 */
 	ssize_t (*fb_read)(struct fb_info *info, char __user *buf,
 			   size_t count, loff_t *ppos);
 	ssize_t (*fb_write)(struct fb_info *info, const char __user *buf,
 			    size_t count, loff_t *ppos);
 
 	/* checks var and eventually tweaks it to something supported,
-	 * DO NOT MODIFY PAR */
+	 * DO NOT MODIFY PAR */ /* 参数检查 */
 	int (*fb_check_var)(struct fb_var_screeninfo *var, struct fb_info *info);
 
-	/* set the video mode according to info->var */
+	/* set the video mode according to info->var 参数设置 */
 	int (*fb_set_par)(struct fb_info *info);
 
-	/* set color register */
+	/* set color register 设置颜色寄存器 */
 	int (*fb_setcolreg)(unsigned regno, unsigned red, unsigned green,
 			    unsigned blue, unsigned transp, struct fb_info *info);
 
-	/* set color registers in batch */
+	/* set color registers in batch 设置颜色映射表 */
 	int (*fb_setcmap)(struct fb_cmap *cmap, struct fb_info *info);
 
-	/* blank display */
+	/* blank display 清空显示*/
 	int (*fb_blank)(int blank, struct fb_info *info);
 
-	/* pan display */
+	/* pan display 游动显示 */
 	int (*fb_pan_display)(struct fb_var_screeninfo *var, struct fb_info *info);
 
-	/* Draws a rectangle */
+	/* Draws a rectangle 绘制矩形 */
 	void (*fb_fillrect) (struct fb_info *info, const struct fb_fillrect *rect);
-	/* Copy data from area to another */
+	/* Copy data from area to another 区域复制 */
 	void (*fb_copyarea) (struct fb_info *info, const struct fb_copyarea *region);
-	/* Draws a image to the display */
+	/* Draws a image to the display 绘制图像 */
 	void (*fb_imageblit) (struct fb_info *info, const struct fb_image *image);
 
-	/* Draws cursor */
+	/* Draws cursor 光标 */
 	int (*fb_cursor) (struct fb_info *info, struct fb_cursor *cursor);
 
 	/* wait for blit idle, optional */
 	int (*fb_sync)(struct fb_info *info);
 
-	/* perform fb specific ioctl (optional) */
+	/* perform fb specific ioctl (optional) 命令接口 */
 	int (*fb_ioctl)(struct fb_info *info, unsigned int cmd,
 			unsigned long arg);
 
-	/* Handle 32bit compat ioctl (optional) */
+	/* Handle 32bit compat ioctl (optional) 兼容性命令接口 */
 	int (*fb_compat_ioctl)(struct fb_info *info, unsigned cmd,
 			unsigned long arg);
 
-	/* perform fb specific mmap */
+	/* perform fb specific mmap 特殊映射接口 */
 	int (*fb_mmap)(struct fb_info *info, struct vm_area_struct *vma);
 
-	/* get capability given var */
+	/* get capability given var 获取驱动能力 */
 	void (*fb_get_caps)(struct fb_info *info, struct fb_blit_caps *caps,
 			    struct fb_var_screeninfo *var);
 
@@ -443,26 +443,26 @@ struct fb_info {
 	 * a lcd is not mounted upright and fbcon should rotate to compensate.
 	 */
 	int fbcon_rotate_hint;
-	struct mutex lock;		/* Lock for open/release/ioctl funcs */
-	struct mutex mm_lock;		/* Lock for fb_mmap and smem_* fields */
-	struct fb_var_screeninfo var;	/* Current var */
-	struct fb_fix_screeninfo fix;	/* Current fix */
-	struct fb_monspecs monspecs;	/* Current Monitor specs */
-	struct work_struct queue;	/* Framebuffer event queue */
-	struct fb_pixmap pixmap;	/* Image hardware mapper */
-	struct fb_pixmap sprite;	/* Cursor hardware mapper */
-	struct fb_cmap cmap;		/* Current cmap */
-	struct list_head modelist;      /* mode list */
-	struct fb_videomode *mode;	/* current mode */
+	struct mutex lock;		/* Lock for open/release/ioctl funcs 互斥锁 */
+	struct mutex mm_lock;		/* Lock for fb_mmap and smem_* fields：fb_mmap and smem_*的锁 */
+	struct fb_var_screeninfo var;	/* Current var 可变屏幕参数 */
+	struct fb_fix_screeninfo fix;	/* Current fix 固定屏幕参数 */
+	struct fb_monspecs monspecs;	/* Current Monitor specs 当前显示器规则*/
+	struct work_struct queue;	/* Framebuffer event queue：Framebuffer事件队列 */
+	struct fb_pixmap pixmap;	/* Image hardware mapper 图像映射表 */
+	struct fb_pixmap sprite;	/* Cursor hardware mapper 光标映射表 */
+	struct fb_cmap cmap;		/* Current cmap 当前cmap*/
+	struct list_head modelist;      /* mode list 模式列表 */
+	struct fb_videomode *mode;	/* current mode  当前模式 */
 
 #if IS_ENABLED(CONFIG_FB_BACKLIGHT)
 	/* assigned backlight device */
 	/* set before framebuffer registration,
 	   remove after unregister */
-	struct backlight_device *bl_dev;
+	struct backlight_device *bl_dev; /* 背光设备 */
 
 	/* Backlight level curve */
-	struct mutex bl_curve_mutex;
+	struct mutex bl_curve_mutex; /* 背光电压曲线 */
 	u8 bl_curve[FB_BACKLIGHT_LEVELS];
 #endif
 #ifdef CONFIG_FB_DEFERRED_IO
@@ -470,24 +470,24 @@ struct fb_info {
 	struct fb_deferred_io *fbdefio;
 #endif
 
-	const struct fb_ops *fbops;
-	struct device *device;		/* This is the parent */
-	struct device *dev;		/* This is this fb device */
-	int class_flag;                    /* private sysfs flags */
+	const struct fb_ops *fbops; /* framebuffer操作函数 */
+	struct device *device;		/* This is the parent 父设备 */
+	struct device *dev;		/* This is this fb device：fb设备 */
+	int class_flag;                    /* private sysfs flags 私有sysfs标志 */
 #ifdef CONFIG_FB_TILEBLITTING
-	struct fb_tile_ops *tileops;    /* Tile Blitting */
+	struct fb_tile_ops *tileops;    /* Tile Blitting 图块操作 */
 #endif
 	union {
-		char __iomem *screen_base;	/* Virtual address */
+		char __iomem *screen_base;	/* Virtual address 虚拟地址 */
 		char *screen_buffer;
 	};
 	unsigned long screen_size;	/* Amount of ioremapped VRAM or 0 */
-	void *pseudo_palette;		/* Fake palette of 16 colors */
+	void *pseudo_palette;		/* Fake palette of 16 colors: 16色假彩色表 */
 #define FBINFO_STATE_RUNNING	0
 #define FBINFO_STATE_SUSPENDED	1
-	u32 state;			/* Hardware state i.e suspend */
-	void *fbcon_par;                /* fbcon use-only private area */
-	/* From here on everything is device dependent */
+	u32 state;			/* Hardware state i.e suspend 硬件状态如挂起等 */
+	void *fbcon_par;                /* fbcon use-only private area：fbcon使用的私有数据 */
+	/* From here on everything is device dependent 以下均与设备关联 */
 	void *par;
 	/* we need the PCI or similar aperture base/size not
 	   smem_start/size as smem_start may just be an object

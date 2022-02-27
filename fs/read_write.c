@@ -476,7 +476,7 @@ EXPORT_SYMBOL(kernel_read);
 ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
 {
 	ssize_t ret;
-
+    /* 检查文件打开文件时是否启用读模式 */
 	if (!(file->f_mode & FMODE_READ))
 		return -EBADF;
 	if (!(file->f_mode & FMODE_CAN_READ))
@@ -491,13 +491,13 @@ ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
 		count =  MAX_RW_COUNT;
 
 	if (file->f_op->read)
-		ret = file->f_op->read(file, buf, count, pos);
+		ret = file->f_op->read(file, buf, count, pos); /* 如果提供了read方法，调用 */
 	else if (file->f_op->read_iter)
-		ret = new_sync_read(file, buf, count, pos);
+		ret = new_sync_read(file, buf, count, pos); /* 如果提供了read_iter方法，调用 */
 	else
 		ret = -EINVAL;
 	if (ret > 0) {
-		fsnotify_access(file);
+		fsnotify_access(file); /* 通告文件被访问事件 */
 		add_rchar(current, ret);
 	}
 	inc_syscr(current);
@@ -622,11 +622,11 @@ static inline loff_t *file_ppos(struct file *file)
 
 ssize_t ksys_read(unsigned int fd, char __user *buf, size_t count)
 {
-	struct fd f = fdget_pos(fd);
+	struct fd f = fdget_pos(fd); /* 根据文件描述符查找file实例 */
 	ssize_t ret = -EBADF;
 
 	if (f.file) {
-		loff_t pos, *ppos = file_ppos(f.file);
+		loff_t pos, *ppos = file_ppos(f.file); /* 读取当前文件偏移 */
 		if (ppos) {
 			pos = *ppos;
 			ppos = &pos;
@@ -634,7 +634,7 @@ ssize_t ksys_read(unsigned int fd, char __user *buf, size_t count)
 		ret = vfs_read(f.file, buf, count, ppos);
 		if (ret >= 0 && ppos)
 			f.file->f_pos = pos;
-		fdput_pos(f);
+		fdput_pos(f); /* 释放file实例 */
 	}
 	return ret;
 }

@@ -50,21 +50,21 @@ struct files_struct {
   /*
    * read mostly part
    */
-	atomic_t count;
+	atomic_t count; /* 已使用的文件描述符计数 */
 	bool resize_in_progress;
 	wait_queue_head_t resize_wait;
 
-	struct fdtable __rcu *fdt;
+	struct fdtable __rcu *fdt; /* 文件描述符表 */
 	struct fdtable fdtab;
   /*
-   * written part on a separate cache line in SMP
+   * written part on a separate cache line in SMP 在SMP中写部分在一个独立的cache行
    */
 	spinlock_t file_lock ____cacheline_aligned_in_smp;
 	unsigned int next_fd;
 	unsigned long close_on_exec_init[1];
 	unsigned long open_fds_init[1];
 	unsigned long full_fds_bits_init[1];
-	struct file __rcu * fd_array[NR_OPEN_DEFAULT];
+	struct file __rcu * fd_array[NR_OPEN_DEFAULT]; /* 文件描述符数组 */
 };
 
 struct file_operations;

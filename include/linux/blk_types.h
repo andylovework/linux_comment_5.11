@@ -25,10 +25,10 @@ struct block_device {
 	struct disk_stats __percpu *bd_stats;
 	unsigned long		bd_stamp;
 	bool			bd_read_only;	/* read-only policy */
-	dev_t			bd_dev;
+	dev_t			bd_dev; /* 搜索键 */
 	int			bd_openers;
 	struct inode *		bd_inode;	/* will die */
-	struct super_block *	bd_super;
+	struct super_block *	bd_super; /* 超级快 */
 	void *			bd_claiming;
 	struct device		bd_device;
 	void *			bd_holder;
@@ -217,13 +217,13 @@ static inline void bio_issue_init(struct bio_issue *issue,
  * stacking drivers)
  */
 struct bio {
-	struct bio		*bi_next;	/* request queue link */
-	struct block_device	*bi_bdev;
+	struct bio		*bi_next;	/* request queue link 请求队列链*/
+	struct block_device	*bi_bdev; /* 发起请求的快设备 */
 	unsigned int		bi_opf;		/* bottom bits req flags,
 						 * top bits REQ_OP. Use
 						 * accessors.
 						 */
-	unsigned short		bi_flags;	/* BIO_* below */
+	unsigned short		bi_flags;	/* BIO_* below 状态、命令等 */
 	unsigned short		bi_ioprio;
 	unsigned short		bi_write_hint;
 	blk_status_t		bi_status;
@@ -258,17 +258,17 @@ struct bio {
 #endif
 	};
 
-	unsigned short		bi_vcnt;	/* how many bio_vec's */
+	unsigned short		bi_vcnt;	/* how many bio_vec's：bio_vec数量 */
 
 	/*
 	 * Everything starting with bi_max_vecs will be preserved by bio_reset()
 	 */
 
-	unsigned short		bi_max_vecs;	/* max bvl_vecs we can hold */
+	unsigned short		bi_max_vecs;	/* max bvl_vecs we can hold 最大的bio_vec数量 */
 
 	atomic_t		__bi_cnt;	/* pin count */
 
-	struct bio_vec		*bi_io_vec;	/* the actual vec list */
+	struct bio_vec		*bi_io_vec;	/* the actual vec list：bio_vec链表，包含当前I/O涉及的内存信息 */
 
 	struct bio_set		*bi_pool;
 

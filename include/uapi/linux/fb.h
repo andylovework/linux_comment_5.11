@@ -155,24 +155,24 @@
 #define FB_CAP_FOURCC		1	/* Device supports FOURCC-based formats */
 
 struct fb_fix_screeninfo {
-	char id[16];			/* identification string eg "TT Builtin" */
-	unsigned long smem_start;	/* Start of frame buffer mem */
+	char id[16];			/* identification string eg "TT Builtin" 标识字符串 */
+	unsigned long smem_start;	/* Start of frame buffer mem：framebuffer 物理地址起点 */
 					/* (physical address) */
-	__u32 smem_len;			/* Length of frame buffer mem */
-	__u32 type;			/* see FB_TYPE_*		*/
+	__u32 smem_len;			/* Length of frame buffer mem：framebuffer 物理内存长度*/
+	__u32 type;			/* see FB_TYPE_*：参考FB_TYPE_标志	*/
 	__u32 type_aux;			/* Interleave for interleaved Planes */
-	__u32 visual;			/* see FB_VISUAL_*		*/ 
+	__u32 visual;			/* see FB_VISUAL_*：视频模式，参考FB_VISUAL_标志		*/ 
 	__u16 xpanstep;			/* zero if no hardware panning  */
 	__u16 ypanstep;			/* zero if no hardware panning  */
 	__u16 ywrapstep;		/* zero if no hardware ywrap    */
-	__u32 line_length;		/* length of a line in bytes    */
-	unsigned long mmio_start;	/* Start of Memory Mapped I/O   */
+	__u32 line_length;		/* length of a line in bytes 行字节 */
+	unsigned long mmio_start;	/* Start of Memory Mapped I/O：I/O映射内存起点 */
 					/* (physical address) */
-	__u32 mmio_len;			/* Length of Memory Mapped I/O  */
+	__u32 mmio_len;			/* Length of Memory Mapped I/O：I/O映射内存长度 */
 	__u32 accel;			/* Indicate to driver which	*/
 					/*  specific chip/card we have	*/
-	__u16 capabilities;		/* see FB_CAP_*			*/
-	__u16 reserved[2];		/* Reserved for future compatibility */
+	__u16 capabilities;		/* see FB_CAP_*：参见标志FB_CAP_ */
+	__u16 reserved[2];		/* Reserved for future compatibility 保留 */
 };
 
 /* Interpretation of offset for color fields: All offsets are from the right,
@@ -240,43 +240,43 @@ struct fb_bitfield {
 #define KHZ2PICOS(a) (1000000000UL/(a))
 
 struct fb_var_screeninfo {
-	__u32 xres;			/* visible resolution		*/
+	__u32 xres;			/* visible resolution 可视分辨率 		*/
 	__u32 yres;
-	__u32 xres_virtual;		/* virtual resolution		*/
+	__u32 xres_virtual;		/* virtual resolution 虚拟分辨率 */
 	__u32 yres_virtual;
-	__u32 xoffset;			/* offset from virtual to visible */
-	__u32 yoffset;			/* resolution			*/
+	__u32 xoffset;			/* offset from virtual to visible 从虚拟到可见区的X偏移  */
+	__u32 yoffset;			/* 从虚拟到可见区的Y偏移 			*/
 
-	__u32 bits_per_pixel;		/* guess what			*/
-	__u32 grayscale;		/* 0 = color, 1 = grayscale,	*/
+	__u32 bits_per_pixel;		/* 每像素bit			*/
+	__u32 grayscale;		/* 0 = color, 1 = grayscale,表示灰度图	*/
 					/* >1 = FOURCC			*/
 	struct fb_bitfield red;		/* bitfield in fb mem if true color, */
 	struct fb_bitfield green;	/* else only length is significant */
 	struct fb_bitfield blue;
-	struct fb_bitfield transp;	/* transparency			*/	
+	struct fb_bitfield transp;	/* transparency	透明度	*/	
 
-	__u32 nonstd;			/* != 0 Non standard pixel format */
+	__u32 nonstd;			/* != 0 Non standard pixel format 非标准像素格式 */
 
-	__u32 activate;			/* see FB_ACTIVATE_*		*/
+	__u32 activate;			/* see FB_ACTIVATE_* 查看FB_ACTIVATE_标志	*/
 
-	__u32 height;			/* height of picture in mm    */
-	__u32 width;			/* width of picture in mm     */
+	__u32 height;			/* height of picture in mm 图像高度    */
+	__u32 width;			/* width of picture in mm 图像宽度 */
 
 	__u32 accel_flags;		/* (OBSOLETE) see fb_info.flags */
 
 	/* Timing: All values in pixclocks, except pixclock (of course) */
-	__u32 pixclock;			/* pixel clock in ps (pico seconds) */
-	__u32 left_margin;		/* time from sync to picture	*/
-	__u32 right_margin;		/* time from picture to sync	*/
-	__u32 upper_margin;		/* time from sync to picture	*/
+	__u32 pixclock;			/* pixel clock in ps (pico seconds) 像素时钟 */
+	__u32 left_margin;		/* time from sync to picture 行同步信号到图像的时钟数 */
+	__u32 right_margin;		/* time from picture to sync 图像到同步信号的时钟数 */
+	__u32 upper_margin;		/* time from sync to picture 帧同步信号到图像的时钟数 */
 	__u32 lower_margin;
-	__u32 hsync_len;		/* length of horizontal sync	*/
-	__u32 vsync_len;		/* length of vertical sync	*/
-	__u32 sync;			/* see FB_SYNC_*		*/
-	__u32 vmode;			/* see FB_VMODE_*		*/
-	__u32 rotate;			/* angle we rotate counter clockwise */
-	__u32 colorspace;		/* colorspace for FOURCC-based modes */
-	__u32 reserved[4];		/* Reserved for future compatibility */
+	__u32 hsync_len;		/* length of horizontal sync 水平同步长度 */
+	__u32 vsync_len;		/* length of vertical sync	垂直同步长度*/
+	__u32 sync;			/* see FB_SYNC_*：参考FB_SYNC_标志 */
+	__u32 vmode;			/* see FB_VMODE_*：参考FB_VMODE_标志		*/
+	__u32 rotate;			/* angle we rotate counter clockwise 旋转 */
+	__u32 colorspace;		/* colorspace for FOURCC-based modes：FOURCC模式的颜色控件 */
+	__u32 reserved[4];		/* Reserved for future compatibility 保留 */
 };
 
 struct fb_cmap {

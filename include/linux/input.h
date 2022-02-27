@@ -136,18 +136,18 @@ enum input_clock_type {
  */
 struct input_dev {
 	const char *name;
-	const char *phys;
-	const char *uniq;
-	struct input_id id;
+	const char *phys; /* 设备在系统的物理路径 */
+	const char *uniq; /* 设备唯一识别符 */
+	struct input_id id; /* 设备ID，包含总线ID(PCI,USB)、厂商ID和设备ID */
 
 	unsigned long propbit[BITS_TO_LONGS(INPUT_PROP_CNT)];
 
 	unsigned long evbit[BITS_TO_LONGS(EV_CNT)];
-	unsigned long keybit[BITS_TO_LONGS(KEY_CNT)];
-	unsigned long relbit[BITS_TO_LONGS(REL_CNT)];
-	unsigned long absbit[BITS_TO_LONGS(ABS_CNT)];
+	unsigned long keybit[BITS_TO_LONGS(KEY_CNT)]; /* 支持的键盘事件 */
+	unsigned long relbit[BITS_TO_LONGS(REL_CNT)]; /* 支持的相对值事件 */
+	unsigned long absbit[BITS_TO_LONGS(ABS_CNT)]; /* 支持的绝对值事件 */
 	unsigned long mscbit[BITS_TO_LONGS(MSC_CNT)];
-	unsigned long ledbit[BITS_TO_LONGS(LED_CNT)];
+	unsigned long ledbit[BITS_TO_LONGS(LED_CNT)]; /* 支持的LED事件 */
 	unsigned long sndbit[BITS_TO_LONGS(SND_CNT)];
 	unsigned long ffbit[BITS_TO_LONGS(FF_CNT)];
 	unsigned long swbit[BITS_TO_LONGS(SW_CNT)];
@@ -156,7 +156,7 @@ struct input_dev {
 
 	unsigned int keycodemax;
 	unsigned int keycodesize;
-	void *keycode;
+	void *keycode; /* 键盘码 */
 
 	int (*setkeycode)(struct input_dev *dev,
 			  const struct input_keymap_entry *ke,
@@ -185,12 +185,12 @@ struct input_dev {
 	int (*open)(struct input_dev *dev);
 	void (*close)(struct input_dev *dev);
 	int (*flush)(struct input_dev *dev, struct file *file);
-	int (*event)(struct input_dev *dev, unsigned int type, unsigned int code, int value);
+	int (*event)(struct input_dev *dev, unsigned int type, unsigned int code, int value); /* 事件接口 */
 
 	struct input_handle __rcu *grab;
 
 	spinlock_t event_lock;
-	struct mutex mutex;
+	struct mutex mutex; /* 互斥锁 */
 
 	unsigned int users;
 	bool going_away;
@@ -310,15 +310,16 @@ struct input_handle;
 struct input_handler {
 
 	void *private;
-
+    /* 事件处理 */
 	void (*event)(struct input_handle *handle, unsigned int type, unsigned int code, int value);
 	void (*events)(struct input_handle *handle,
-		       const struct input_value *vals, unsigned int count);
+		       const struct input_value *vals, unsigned int count); /* 事件序列处理 */
 	bool (*filter)(struct input_handle *handle, unsigned int type, unsigned int code, int value);
 	bool (*match)(struct input_handler *handler, struct input_dev *dev);
+	/* 绑定input handle到输入设备 */
 	int (*connect)(struct input_handler *handler, struct input_dev *dev, const struct input_device_id *id);
 	void (*disconnect)(struct input_handle *handle);
-	void (*start)(struct input_handle *handle);
+	void (*start)(struct input_handle *handle); /* 启动函数，connect函数之后调用 */
 
 	bool legacy_minors;
 	int minor;
@@ -419,32 +420,32 @@ ktime_t *input_get_timestamp(struct input_dev *dev);
 
 void input_event(struct input_dev *dev, unsigned int type, unsigned int code, int value);
 void input_inject_event(struct input_handle *handle, unsigned int type, unsigned int code, int value);
-
+/* 键盘事件 */
 static inline void input_report_key(struct input_dev *dev, unsigned int code, int value)
 {
 	input_event(dev, EV_KEY, code, !!value);
 }
-
+/* 相对值 */
 static inline void input_report_rel(struct input_dev *dev, unsigned int code, int value)
 {
 	input_event(dev, EV_REL, code, value);
 }
-
+/* 绝对值 */
 static inline void input_report_abs(struct input_dev *dev, unsigned int code, int value)
 {
 	input_event(dev, EV_ABS, code, value);
 }
-
+/* 力反馈状态 */
 static inline void input_report_ff_status(struct input_dev *dev, unsigned int code, int value)
 {
 	input_event(dev, EV_FF_STATUS, code, value);
 }
-
+/* switch事件 */
 static inline void input_report_switch(struct input_dev *dev, unsigned int code, int value)
 {
 	input_event(dev, EV_SW, code, !!value);
 }
-
+/* 告诉输入子系统一个完整的报告已发送 */
 static inline void input_sync(struct input_dev *dev)
 {
 	input_event(dev, EV_SYN, SYN_REPORT, 0);

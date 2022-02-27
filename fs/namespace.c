@@ -4193,7 +4193,7 @@ static void __init init_mount_tree(void)
 	struct mount *m;
 	struct mnt_namespace *ns;
 	struct path root;
-
+    /* 挂接rootfs文件系统 */
 	mnt = vfs_kern_mount(&rootfs_fs_type, 0, "rootfs", NULL);
 	if (IS_ERR(mnt))
 		panic("Can't create rootfs");

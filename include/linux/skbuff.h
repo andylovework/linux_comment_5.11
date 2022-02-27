@@ -721,11 +721,11 @@ struct sk_buff {
 	union {
 		struct {
 			/* These two members must be first. */
-			struct sk_buff		*next;
-			struct sk_buff		*prev;
+			struct sk_buff		*next; /* sk_buff结构体是双链表，指向后面的sk_buff结构体指针 */
+			struct sk_buff		*prev; /* 指向后面的sk_buff结构体指针 */
 
 			union {
-				struct net_device	*dev;
+				struct net_device	*dev; /* 一个网络设备，当skb为输出/输入时，dev表示输出/输入到的设备 */
 				/* Some protocols might use this space to store information,
 				 * while device pointer would be NULL.
 				 * UDP receive path is one user.

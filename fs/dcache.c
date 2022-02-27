@@ -3263,10 +3263,10 @@ void __init vfs_caches_init(void)
 			SLAB_HWCACHE_ALIGN|SLAB_PANIC, 0, PATH_MAX, NULL);
 
 	dcache_init();
-	inode_init();
-	files_init();
+	inode_init(); /* 创建inode结构对象cache，初始化等待队列 */
+	files_init(); /* 初始化struct files_stat_struct files_stat */
 	files_maxfiles_init();
-	mnt_init();
-	bdev_cache_init();
-	chrdev_init();
+	mnt_init(); /* 函数mnt_init初始化挂接点的全局链表，初始化rootfs及sysfs文件系统，初始化挂接点 */
+	bdev_cache_init(); /* 注册块设备文件系统  */
+	chrdev_init(); /* 初始字符设备子系统 */
 }

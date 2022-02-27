@@ -93,30 +93,30 @@ struct dentry {
 	unsigned int d_flags;		/* protected by d_lock */
 	seqcount_spinlock_t d_seq;	/* per dentry seqlock */
 	struct hlist_bl_node d_hash;	/* lookup hash list */
-	struct dentry *d_parent;	/* parent directory */
+	struct dentry *d_parent;	/* parent directory父目录 */
 	struct qstr d_name;
 	struct inode *d_inode;		/* Where the name belongs to - NULL is
-					 * negative */
-	unsigned char d_iname[DNAME_INLINE_LEN];	/* small names */
+					 * negative 与该目录项关联的inode */
+	unsigned char d_iname[DNAME_INLINE_LEN];	/* small names 短文件名 */
 
 	/* Ref lookup also touches following */
 	struct lockref d_lockref;	/* per-dentry lock and refcount */
-	const struct dentry_operations *d_op;
-	struct super_block *d_sb;	/* The root of the dentry tree */
-	unsigned long d_time;		/* used by d_revalidate */
-	void *d_fsdata;			/* fs-specific data */
+	const struct dentry_operations *d_op; /* 目录项操作 */
+	struct super_block *d_sb;	/* The root of the dentry tree这个目录项所属的文件系统的超级块(目录项树的根) */
+	unsigned long d_time;		/* used by d_revalidate重新生效时间 */
+	void *d_fsdata;			/* fs-specific data具体文件系统的数据 */
 
 	union {
-		struct list_head d_lru;		/* LRU list */
+		struct list_head d_lru;		/* LRU list 未使用目录以LRU 算法链接的链表*/
 		wait_queue_head_t *d_wait;	/* in-lookup ones only */
 	};
-	struct list_head d_child;	/* child of parent list */
-	struct list_head d_subdirs;	/* our children */
+	struct list_head d_child;	/* child of parent list目录项通过这个加入到父目录的d_subdirs中 */
+	struct list_head d_subdirs;	/* our children本目录的所有孩子目录链表头 */
 	/*
 	 * d_alias and d_rcu can share memory
 	 */
 	union {
-		struct hlist_node d_alias;	/* inode alias list */
+		struct hlist_node d_alias;	/* inode alias list 索引节点别名链表*/
 		struct hlist_bl_node d_in_lookup_hash;	/* only for in-lookup ones */
 	 	struct rcu_head d_rcu;
 	} d_u;
@@ -135,16 +135,16 @@ enum dentry_d_lock_class
 };
 
 struct dentry_operations {
-	int (*d_revalidate)(struct dentry *, unsigned int);
+	int (*d_revalidate)(struct dentry *, unsigned int); /* 该函数判断目录对象是否有效。VFS准备从dcache中使用一个目录项时，会调用该函数. */
 	int (*d_weak_revalidate)(struct dentry *, unsigned int);
-	int (*d_hash)(const struct dentry *, struct qstr *);
-	int (*d_compare)(const struct dentry *,
+	int (*d_hash)(const struct dentry *, struct qstr *); /* 该目录生成散列值，当目录项要加入到散列表时，VFS要调用此函数。 */
+	int (*d_compare)(const struct dentry *, /* 该函数来比较name1和name2这两个文件名。使用该函数要加dcache_lock锁。 */
 			unsigned int, const char *, const struct qstr *);
-	int (*d_delete)(const struct dentry *);
+	int (*d_delete)(const struct dentry *); /* 当d_count=0时，VFS调用次函数。使用该函数要叫 dcache_lock锁。 */
 	int (*d_init)(struct dentry *);
-	void (*d_release)(struct dentry *);
+	void (*d_release)(struct dentry *); /* 当该目录对象将要被释放时，VFS调用该函数。 */
 	void (*d_prune)(struct dentry *);
-	void (*d_iput)(struct dentry *, struct inode *);
+	void (*d_iput)(struct dentry *, struct inode *);  /* 当一个目录项丢失了其索引节点时，VFS就掉用该函数。 */
 	char *(*d_dname)(struct dentry *, char *, int);
 	struct vfsmount *(*d_automount)(struct path *);
 	int (*d_manage)(const struct path *, bool);

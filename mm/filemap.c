@@ -2547,7 +2547,7 @@ ssize_t filemap_read(struct kiocb *iocb, struct iov_iter *iter,
 		if ((iocb->ki_flags & IOCB_WAITQ) && already_read)
 			iocb->ki_flags |= IOCB_NOWAIT;
 
-		error = filemap_get_pages(iocb, iter, &pvec);
+		error = filemap_get_pages(iocb, iter, &pvec); /* 在页缓存中查找页 */ 
 		if (error < 0)
 			break;
 
@@ -2589,7 +2589,7 @@ ssize_t filemap_read(struct kiocb *iocb, struct iov_iter *iter,
 			if (end_offset < page_offset(page))
 				break;
 			if (i > 0)
-				mark_page_accessed(page);
+				mark_page_accessed(page); /* 标记页被访问过 */
 			/*
 			 * If users can be writing to this page using arbitrary
 			 * virtual addresses, take care about potential aliasing
@@ -2602,7 +2602,7 @@ ssize_t filemap_read(struct kiocb *iocb, struct iov_iter *iter,
 					flush_dcache_page(page + j);
 			}
 
-			copied = copy_page_to_iter(page, offset, bytes, iter);
+			copied = copy_page_to_iter(page, offset, bytes, iter); /* 把数据从页缓存复制到用户缓冲区 */
 
 			already_read += copied;
 			iocb->ki_pos += copied;
@@ -3662,7 +3662,7 @@ again:
 			flush_dcache_page(page);
 
 		copied = copy_page_from_iter_atomic(page, offset, bytes, i);
-		flush_dcache_page(page);
+		flush_dcache_page(page); /* 把数据缓存中的数据协会到内存 */
 
 		status = a_ops->write_end(file, mapping, pos, bytes, copied,
 						page, fsdata);
@@ -3687,7 +3687,7 @@ again:
 		pos += status;
 		written += status;
 
-		balance_dirty_pages_ratelimited(mapping);
+		balance_dirty_pages_ratelimited(mapping); /* 控制进程写文件时生成脏页的速度 */
 	} while (iov_iter_count(i));
 
 	return written ? written : status;
