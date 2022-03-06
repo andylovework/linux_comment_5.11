@@ -2021,7 +2021,7 @@ void __init init_timers(void)
 {
 	init_timer_cpus();
 	posix_cputimers_init_work();
-	open_softirq(TIMER_SOFTIRQ, run_timer_softirq);
+	open_softirq(TIMER_SOFTIRQ, run_timer_softirq); /* 初始化时钟的软中断处理函数 */
 }
 
 /**

@@ -43,8 +43,8 @@ struct rw_semaphore {
 #ifdef CONFIG_RWSEM_SPIN_ON_OWNER
 	struct optimistic_spin_queue osq; /* spinner MCS lock */
 #endif
-	raw_spinlock_t wait_lock;
-	struct list_head wait_list;
+	raw_spinlock_t wait_lock; /* 自旋锁，保护信号量其他成员 */
+	struct list_head wait_list; /* 等待进入临界区的进程链表 */
 #ifdef CONFIG_DEBUG_RWSEMS
 	void *magic;
 #endif
@@ -97,7 +97,7 @@ static inline int rwsem_is_locked(struct rw_semaphore *sem)
 
 #define DECLARE_RWSEM(name) \
 	struct rw_semaphore name = __RWSEM_INITIALIZER(name)
-
+/* 运行时动态初始化读写信号量 */
 extern void __init_rwsem(struct rw_semaphore *sem, const char *name,
 			 struct lock_class_key *key);
 
@@ -120,7 +120,7 @@ static inline int rwsem_is_contended(struct rw_semaphore *sem)
 }
 
 /*
- * lock for reading
+ * lock for reading申请读锁，如果写者占有写锁或者正在等待写锁，那么进程进入睡眠（深度、轻度、中度）
  */
 extern void down_read(struct rw_semaphore *sem);
 extern int __must_check down_read_interruptible(struct rw_semaphore *sem);
@@ -129,10 +129,10 @@ extern int __must_check down_read_killable(struct rw_semaphore *sem);
 /*
  * trylock for reading -- returns 1 if successful, 0 if contention
  */
-extern int down_read_trylock(struct rw_semaphore *sem);
+extern int down_read_trylock(struct rw_semaphore *sem); /* 尝试申请读锁，不会等待 */
 
 /*
- * lock for writing
+ * lock for writing 申请写锁
  */
 extern void down_write(struct rw_semaphore *sem);
 extern int __must_check down_write_killable(struct rw_semaphore *sem);
@@ -143,17 +143,17 @@ extern int __must_check down_write_killable(struct rw_semaphore *sem);
 extern int down_write_trylock(struct rw_semaphore *sem);
 
 /*
- * release a read lock
+ * release a read lock释放读锁
  */
 extern void up_read(struct rw_semaphore *sem);
 
 /*
- * release a write lock
+ * release a write lock 释放写锁
  */
 extern void up_write(struct rw_semaphore *sem);
 
 /*
- * downgrade write lock to read lock
+ * downgrade write lock to read lock占有写锁后，把写锁降级为读锁
  */
 extern void downgrade_write(struct rw_semaphore *sem);
 

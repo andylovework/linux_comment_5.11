@@ -664,9 +664,9 @@ struct task_struct {
 	 * For reasons of header soup (see current_thread_info()), this
 	 * must be the first element of task_struct.
 	 */
-	struct thread_info		thread_info;
+	struct thread_info		thread_info; /* 进程基本信息 */
 #endif
-	unsigned int			__state;
+	unsigned int			__state; /* 进程状态 */
 
 	/*
 	 * This begins the randomizable portion of task_struct. Only
@@ -674,10 +674,10 @@ struct task_struct {
 	 */
 	randomized_struct_fields_start
 
-	void				*stack;
+	void				*stack; /*  指向内核栈的指针 */
 	refcount_t			usage;
 	/* Per task flags (PF_*), defined further below: */
-	unsigned int			flags;
+	unsigned int			flags; //* sched.h:1577*
 	unsigned int			ptrace;
 
 #ifdef CONFIG_SMP
@@ -703,14 +703,14 @@ struct task_struct {
 #endif
 	int				on_rq;
 
-	int				prio;
-	int				static_prio;
-	int				normal_prio;
-	unsigned int			rt_priority;
+	int				prio; /* 用来保存动态优先级 */
+	int				static_prio; /* 用来保存静态优先级，可以调用nice系统直接来修改取值范围为100~139 */
+	int				normal_prio; /* 它的值取决于静态优先级和调度策略 */
+	unsigned int			rt_priority; /* 用来保存实时优先级,取值范围为0~99 */
 
-	const struct sched_class	*sched_class;
-	struct sched_entity		se;
-	struct sched_rt_entity		rt;
+	const struct sched_class	*sched_class; /* 调度类 */
+	struct sched_entity		se; /* 普通进程的调用实体，每个进程都有其中之一的实体 */
+	struct sched_rt_entity		rt; /* 实时进程的调用实体，每个进程都有其中之一的实体 */
 	struct sched_dl_entity		dl;
 
 #ifdef CONFIG_SCHED_CORE
@@ -745,8 +745,8 @@ struct task_struct {
 	unsigned int			btrace_seq;
 #endif
 
-	unsigned int			policy;
-	int				nr_cpus_allowed;
+	unsigned int			policy; /* 调度策略 */
+	int				nr_cpus_allowed; /* 用于控制进程可以在哪里处理器上运行 */
 	const cpumask_t			*cpus_ptr;
 	cpumask_t			cpus_mask;
 	void				*migration_pending;
@@ -786,14 +786,14 @@ struct task_struct {
 	struct rb_node			pushable_dl_tasks;
 #endif
 
-	struct mm_struct		*mm;
-	struct mm_struct		*active_mm;
+	struct mm_struct		*mm; /* 进程所拥有的内存空间描述符，对于内核线程的mm为NULL */
+	struct mm_struct		*active_mm; /* 指进程运行时所使用的进程描述符 */
 
 	/* Per-thread vma caching: */
 	struct vmacache			vmacache;
 
 #ifdef SPLIT_RSS_COUNTING
-	struct task_rss_stat		rss_stat;
+	struct task_rss_stat		rss_stat; /* 被用来记录缓冲信息 */
 #endif
 	int				exit_state;
 	int				exit_code;
@@ -844,7 +844,7 @@ struct task_struct {
 	unsigned			in_user_fault:1;
 #endif
 #ifdef CONFIG_COMPAT_BRK
-	unsigned			brk_randomized:1;
+	unsigned			brk_randomized:1; /* 用来确定对随机堆内存的探测 */
 #endif
 #ifdef CONFIG_CGROUPS
 	/* disallow userland-initiated cgroup migration */
@@ -868,8 +868,8 @@ struct task_struct {
 
 	struct restart_block		restart_block;
 
-	pid_t				pid;
-	pid_t				tgid;
+	pid_t				pid; /* 进程的标识符 */
+	pid_t				tgid; /* 线程组标识符 */
 
 #ifdef CONFIG_STACKPROTECTOR
 	/* Canary value for the -fstack-protector GCC feature: */
@@ -881,18 +881,18 @@ struct task_struct {
 	 * p->real_parent->pid)
 	 */
 
-	/* Real parent process: */
+	/* Real parent process:指向当前操作系统执行进程的父进程，如果父进程不存在，指向pid为1的init进程 */
 	struct task_struct __rcu	*real_parent;
 
-	/* Recipient of SIGCHLD, wait4() reports: */
+	/* Recipient of SIGCHLD, wait4() reports: 指向当前进程的父进程，当当前进程终止时，需要向它发送wait4()的信号*/
 	struct task_struct __rcu	*parent;
 
 	/*
 	 * Children/sibling form the list of natural children:
 	 */
-	struct list_head		children;
+	struct list_head		children; /* 位于链表的头部，链表的所有元素都是children的子进程 */
 	struct list_head		sibling;
-	struct task_struct		*group_leader;
+	struct task_struct		*group_leader; /* 指向进程组的领头进程 */
 
 	/*
 	 * 'ptraced' is the list of tasks this task is using ptrace() on.
@@ -940,7 +940,7 @@ struct task_struct {
 	unsigned long			nivcsw;
 
 	/* Monotonic time in nsecs: */
-	u64				start_time;
+	u64				start_time; /* 进程创建时间 */
 
 	/* Boot based time in nsecs: */
 	u64				start_boottime;
@@ -992,10 +992,10 @@ struct task_struct {
 	unsigned long			last_switch_time;
 #endif
 	/* Filesystem information: */
-	struct fs_struct		*fs;
+	struct fs_struct		*fs; /* 文件系统信息 */
 
 	/* Open file information: */
-	struct files_struct		*files;
+	struct files_struct		*files; /* 打开文件信息 */
 
 #ifdef CONFIG_IO_URING
 	struct io_uring_task		*io_uring;
@@ -1005,14 +1005,14 @@ struct task_struct {
 	struct nsproxy			*nsproxy;
 
 	/* Signal handlers: */
-	struct signal_struct		*signal;
-	struct sighand_struct __rcu		*sighand;
-	sigset_t			blocked;
+	struct signal_struct		*signal; /*  指向进程的信号描述符 */
+	struct sighand_struct __rcu		*sighand; /* 指向进程的信号处理程序描述符 */
+	sigset_t			blocked; /* 表示被阻塞信号的掩码，real_blocked表示临时掩码 */
 	sigset_t			real_blocked;
 	/* Restored if set_restore_sigmask() was used: */
 	sigset_t			saved_sigmask;
-	struct sigpending		pending;
-	unsigned long			sas_ss_sp;
+	struct sigpending		pending; /* 存放私有挂起信号的数据结构 */
+	unsigned long			sas_ss_sp; /* 信号处理程序备用堆栈的地址，sas_ss_size表示堆栈的大小 */
 	size_t				sas_ss_size;
 	unsigned int			sas_ss_flags;
 

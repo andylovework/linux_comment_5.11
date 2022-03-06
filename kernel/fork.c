@@ -1939,17 +1939,17 @@ static __latent_entropy struct task_struct *copy_process(
 	sigemptyset(&delayed.signal);
 	INIT_HLIST_NODE(&delayed.node);
 
-	spin_lock_irq(&current->sighand->siglock);
-	if (!(clone_flags & CLONE_THREAD))
+	spin_lock_irq(&current->sighand->siglock); /* 获取指定的自旋锁并禁止中断 */
+	if (!(clone_flags & CLONE_THREAD)) /* 是否同一线程组 */
 		hlist_add_head(&delayed.node, &current->signal->multiprocess);
-	recalc_sigpending();
-	spin_unlock_irq(&current->sighand->siglock);
+	recalc_sigpending(); /* 确定进程等待信号 */
+	spin_unlock_irq(&current->sighand->siglock); /* 解自旋锁并开中断 */
 	retval = -ERESTARTNOINTR;
 	if (task_sigpending(current))
 		goto fork_out;
 
 	retval = -ENOMEM;
-	p = dup_task_struct(current, node);
+	p = dup_task_struct(current, node); /* 复制进程并设置栈 */
 	if (!p)
 		goto fork_out;
 	if (args->io_thread) {
@@ -1975,7 +1975,7 @@ static __latent_entropy struct task_struct *copy_process(
 
 	ftrace_graph_init_task(p);
 
-	rt_mutex_init_task(p);
+	rt_mutex_init_task(p); /* 进程互斥锁初始化 */
 
 	lockdep_assert_irqs_enabled();
 #ifdef CONFIG_PROVE_LOCKING
@@ -2005,13 +2005,13 @@ static __latent_entropy struct task_struct *copy_process(
 	delayacct_tsk_init(p);	/* Must remain after dup_task_struct() */
 	p->flags &= ~(PF_SUPERPRIV | PF_WQ_WORKER | PF_IDLE | PF_NO_SETAFFINITY);
 	p->flags |= PF_FORKNOEXEC;
-	INIT_LIST_HEAD(&p->children);
-	INIT_LIST_HEAD(&p->sibling);
+	INIT_LIST_HEAD(&p->children); /* 初始化链表头 */
+	INIT_LIST_HEAD(&p->sibling); /* 初始化链表头 */
 	rcu_copy_process(p);
 	p->vfork_done = NULL;
 	spin_lock_init(&p->alloc_lock);
 
-	init_sigpending(&p->pending);
+	init_sigpending(&p->pending); /* 初始化信号发送 */
 
 	p->utime = p->stime = p->gtime = 0;
 #ifdef CONFIG_ARCH_HAS_SCALED_CPUTIME
@@ -2261,7 +2261,7 @@ static __latent_entropy struct task_struct *copy_process(
 	 * Copy seccomp details explicitly here, in case they were changed
 	 * before holding sighand lock.
 	 */
-	copy_seccomp(p);
+	copy_seccomp(p); /* 复制安全计算 */
 
 	rseq_fork(p, clone_flags);
 
@@ -2283,11 +2283,11 @@ static __latent_entropy struct task_struct *copy_process(
 
 	init_task_pid_links(p);
 	if (likely(p->pid)) {
-		ptrace_init_task(p, (clone_flags & CLONE_PTRACE) || trace);
+		ptrace_init_task(p, (clone_flags & CLONE_PTRACE) || trace); /* 调试跟踪初始化 */
 
 		init_task_pid(p, PIDTYPE_PID, pid);
 		if (thread_group_leader(p)) {
-			init_task_pid(p, PIDTYPE_TGID, pid);
+			init_task_pid(p, PIDTYPE_TGID, pid); /* 初始化进程标志 */
 			init_task_pid(p, PIDTYPE_PGID, task_pgrp(current));
 			init_task_pid(p, PIDTYPE_SID, task_session(current));
 
@@ -2325,17 +2325,17 @@ static __latent_entropy struct task_struct *copy_process(
 	}
 	total_forks++;
 	hlist_del_init(&delayed.node);
-	spin_unlock(&current->sighand->siglock);
+	spin_unlock(&current->sighand->siglock); /* 自旋锁解锁 */
 	syscall_tracepoint_update(p);
 	write_unlock_irq(&tasklist_lock);
 
-	proc_fork_connector(p);
+	proc_fork_connector(p); /* 关联进程与proc文件系统 */
 	sched_post_fork(p);
 	cgroup_post_fork(p, args);
 	perf_event_fork(p);
 
 	trace_task_newtask(p, clone_flags);
-	uprobe_copy_process(p, clone_flags);
+	uprobe_copy_process(p, clone_flags); /* 复制上下文 */
 
 	copy_oom_score_adj(clone_flags, p);
 
@@ -2398,9 +2398,9 @@ bad_fork_free:
 	put_task_stack(p);
 	delayed_free_task(p);
 fork_out:
-	spin_lock_irq(&current->sighand->siglock);
+	spin_lock_irq(&current->sighand->siglock); /* 获取指定的自旋锁并禁止中断 */
 	hlist_del_init(&delayed.node);
-	spin_unlock_irq(&current->sighand->siglock);
+	spin_unlock_irq(&current->sighand->siglock); /* 解自旋锁并开中断 */
 	return ERR_PTR(retval);
 }
 

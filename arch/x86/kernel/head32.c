@@ -34,9 +34,9 @@ asmlinkage __visible void __init i386_start_kernel(void)
 	/* Make sure IDT is set up before any exception happens */
 	idt_setup_early_handler();
 
-	cr4_init_shadow();
+	cr4_init_shadow(); /* 控制寄存器(CR4)初始化 */
 
-	sanitize_boot_params(&boot_params);
+	sanitize_boot_params(&boot_params); /* 启动参数检查 */
 
 	x86_early_init_platform_quirks();
 
@@ -53,7 +53,7 @@ asmlinkage __visible void __init i386_start_kernel(void)
 		break;
 	}
 
-	start_kernel();
+	start_kernel(); /* 启动内核 */
 }
 
 /*

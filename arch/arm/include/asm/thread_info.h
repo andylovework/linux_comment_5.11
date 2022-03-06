@@ -52,10 +52,10 @@ struct cpu_context_save {
  * __switch_to() assumes cpu_context follows immediately after cpu_domain.
  */
 struct thread_info {
-	unsigned long		flags;		/* low level flags */
-	int			preempt_count;	/* 0 => preemptable, <0 => bug */
-	mm_segment_t		addr_limit;	/* address limit */
-	struct task_struct	*task;		/* main task structure */
+	unsigned long		flags;		/* low level flags 底层标志位*/
+	int			preempt_count;	/* 0 => preemptable, <0 => bug 0，表示可抢占，小于0是缺陷，抢占计数器 */
+	mm_segment_t		addr_limit;	/* address limit 地址限制*/
+	struct task_struct	*task;		/* main task structure 指向所创建的进程 */
 	__u32			cpu;		/* cpu */
 	__u32			cpu_domain;	/* cpu domain */
 #ifdef CONFIG_STACKPROTECTOR_PER_TASK

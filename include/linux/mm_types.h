@@ -393,15 +393,15 @@ struct core_state {
 struct kioctx_table;
 struct mm_struct {
 	struct {
-		struct vm_area_struct *mmap;		/* list of VMAs */
-		struct rb_root mm_rb;
+		struct vm_area_struct *mmap;		/* list of VMAs 指向虚拟区间（VMA）链表 */
+		struct rb_root mm_rb; /* 指向red_black树 */
 		u64 vmacache_seqnum;                   /* per-thread vmacache */
 #ifdef CONFIG_MMU
 		unsigned long (*get_unmapped_area) (struct file *filp,
 				unsigned long addr, unsigned long len,
-				unsigned long pgoff, unsigned long flags);
+				unsigned long pgoff, unsigned long flags); /* 在进程地址空间中搜索有效线性地址区 */
 #endif
-		unsigned long mmap_base;	/* base of mmap area */
+		unsigned long mmap_base;	/* base of mmap area 标识第一个分配文件内存映射的线性地址 */
 		unsigned long mmap_legacy_base;	/* base of mmap area in bottom-up allocations */
 #ifdef CONFIG_HAVE_ARCH_COMPAT_MMAP_BASES
 		/* Base addresses for compatible mmap() */
@@ -431,7 +431,7 @@ struct mm_struct {
 		 * @mm_count (which may then free the &struct mm_struct if
 		 * @mm_count also drops to 0).
 		 */
-		atomic_t mm_users;
+		atomic_t mm_users; /* 进程数量值（在多线程的情况下尤为适用） */
 
 		/**
 		 * @mm_count: The number of references to &struct mm_struct
@@ -440,7 +440,7 @@ struct mm_struct {
 		 * Use mmgrab()/mmdrop() to modify. When this drops to 0, the
 		 * &struct mm_struct is freed.
 		 */
-		atomic_t mm_count;
+		atomic_t mm_count; /* 引用计数（当计数为0的时候表示没有再被使用） */
 
 #ifdef CONFIG_MMU
 		atomic_long_t pgtables_bytes;	/* PTE page table pages */
@@ -471,15 +471,15 @@ struct mm_struct {
 					  */
 
 
-		unsigned long hiwater_rss; /* High-watermark of RSS usage */
-		unsigned long hiwater_vm;  /* High-water virtual memory usage */
+		unsigned long hiwater_rss; /* High-watermark of RSS usage 进程所拥有的最大页框数 */
+		unsigned long hiwater_vm;  /* High-water virtual memory usage 进程线性区中最大页数 */
 
-		unsigned long total_vm;	   /* Total pages mapped */
-		unsigned long locked_vm;   /* Pages that have PG_mlocked set */
-		atomic64_t    pinned_vm;   /* Refcount permanently increased */
+		unsigned long total_vm;	   /* Total pages mapped 进程地址空间的大小(页数） */
+		unsigned long locked_vm;   /* Pages that have PG_mlocked set 锁住而不能换出的页的个数 */
+		atomic64_t    pinned_vm;   /* Refcount permanently increased 共享文件内存映射中的页数 */
 		unsigned long data_vm;	   /* VM_WRITE & ~VM_SHARED & ~VM_STACK */
 		unsigned long exec_vm;	   /* VM_EXEC & ~VM_WRITE & ~VM_STACK */
-		unsigned long stack_vm;	   /* VM_STACK */
+		unsigned long stack_vm;	   /* VM_STACK 用户堆栈中的页数 */
 		unsigned long def_flags;
 
 		/**
@@ -491,9 +491,9 @@ struct mm_struct {
 
 		spinlock_t arg_lock; /* protect the below fields */
 
-		unsigned long start_code, end_code, start_data, end_data;
+		unsigned long start_code, end_code, start_data, end_data; /* 可执行代码的起始地址、最后地址 */
 		unsigned long start_brk, brk, start_stack;
-		unsigned long arg_start, arg_end, env_start, env_end;
+		unsigned long arg_start, arg_end, env_start, env_end; /* 命令行参数的起始地址、最后地址，环境变量的起始地址、 最后地址*/
 
 		unsigned long saved_auxv[AT_VECTOR_SIZE]; /* for /proc/PID/auxv */
 
@@ -513,8 +513,8 @@ struct mm_struct {
 		struct core_state *core_state; /* coredumping support */
 
 #ifdef CONFIG_AIO
-		spinlock_t			ioctx_lock;
-		struct kioctx_table __rcu	*ioctx_table;
+		spinlock_t			ioctx_lock; /* 用于保护异步I/O上下文链表的锁 */
+		struct kioctx_table __rcu	*ioctx_table; /* 异步I/O上下文 */
 #endif
 #ifdef CONFIG_MEMCG
 		/*
