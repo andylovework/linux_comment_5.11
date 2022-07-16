@@ -265,6 +265,7 @@ int alloc_chrdev_region(dev_t *dev, unsigned baseminor, unsigned count,
  * your module name has only one type of devices it's ok to use e.g. the name
  * of the module here.
  */
+/* 注册字符设备 */
 int __register_chrdev(unsigned int major, unsigned int baseminor,
 		      unsigned int count, const char *name,
 		      const struct file_operations *fops)
@@ -308,6 +309,7 @@ out2:
  * starting with @from.  The caller should normally be the one who
  * allocated those numbers in the first place...
  */
+/* 注销字符设备 */
 void unregister_chrdev_region(dev_t from, unsigned count)
 {
 	dev_t to = from + count;

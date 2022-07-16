@@ -37,9 +37,9 @@ struct mountpoint {
 };
 
 struct mount {
-	struct hlist_node mnt_hash;
-	struct mount *mnt_parent;
-	struct dentry *mnt_mountpoint;
+	struct hlist_node mnt_hash;  /* 用于链接到全局已挂载文件系统的链表 */
+	struct mount *mnt_parent; /* 指向父对象，即文件系统1的mount实例 */
+	struct dentry *mnt_mountpoint; /* 指向作为挂载点的目录，即文件系统1的目录a */
 	struct vfsmount mnt;
 	union {
 		struct rcu_head mnt_rcu;
@@ -51,17 +51,17 @@ struct mount {
 	int mnt_count;
 	int mnt_writers;
 #endif
-	struct list_head mnt_mounts;	/* list of children, anchored here */
-	struct list_head mnt_child;	/* and going through their mnt_child */
-	struct list_head mnt_instance;	/* mount instance on sb->s_mounts */
-	const char *mnt_devname;	/* Name of device e.g. /dev/dsk/hda1 */
-	struct list_head mnt_list;
-	struct list_head mnt_expire;	/* link in fs-specific expiry list */
-	struct list_head mnt_share;	/* circular list of shared mounts */
-	struct list_head mnt_slave_list;/* list of slave mounts */
-	struct list_head mnt_slave;	/* slave list entry */
-	struct mount *mnt_master;	/* slave is on master->mnt_slave_list */
-	struct mnt_namespace *mnt_ns;	/* containing namespace */
+	struct list_head mnt_mounts;	/* 挂载在此文件系统下的所有子文件系统的链表的表头，下面的节点都是mnt_child，list of children, anchored here */
+	struct list_head mnt_child;	/* 链接到被此文件系统所挂的父文件系统的mnt_mounts上，and going through their mnt_child */
+	struct list_head mnt_instance;	/* 链接到sb->s_mounts上的一个mount实例，mount instance on sb->s_mounts */
+	const char *mnt_devname;	/* 设备名，如/dev/sdb1，Name of device e.g. /dev/dsk/hda1 */
+	struct list_head mnt_list; /* 链接到进程namespace中已挂载文件系统中，表头为mnt_namespace的list域 */
+	struct list_head mnt_expire;	/* 链接到一些文件系统专有的过期链表，如NFS, CIFS等， link in fs-specific expiry list */
+	struct list_head mnt_share;	/* 链接到共享挂载的循环链表中，circular list of shared mounts */
+	struct list_head mnt_slave_list;/* 此文件系统的slave mount链表的表头， list of slave mounts */
+	struct list_head mnt_slave;	/* 连接到master文件系统的mnt_slave_list，slave list entry */
+	struct mount *mnt_master;	/* 指向此文件系统的master文件系统，slave is on master->mnt_slave_list */
+	struct mnt_namespace *mnt_ns;	/*  指向包含这个文件系统的进程的name space， containing namespace */
 	struct mountpoint *mnt_mp;	/* where is it mounted */
 	union {
 		struct hlist_node mnt_mp_list;	/* list mounts with the same mountpoint */

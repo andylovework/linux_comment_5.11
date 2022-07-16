@@ -1488,8 +1488,8 @@ static int __ref kernel_init(void *unused)
 	kprobe_free_init_mem();
 	ftrace_free_init_mem();
 	kgdb_free_init_mem();
-	free_initmem();
-	mark_readonly();
+	free_initmem(); /* 释放init初始化数据段 */
+	mark_readonly(); /* 标记只读数据段为只读 */
 
 	/*
 	 * Kernel mappings are now finalized - update the userspace page-table

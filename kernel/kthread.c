@@ -38,15 +38,15 @@ struct task_struct *kthreadd_task;
 struct kthread_create_info
 {
 	/* Information passed to kthread() from kthreadd. */
-	int (*threadfn)(void *data);
-	void *data;
+	int (*threadfn)(void *data); /* 要执行的函数 */
+	void *data; /* 传递给函数的数据 */
 	int node;
 
 	/* Result passed back to kthread_create() from kthreadd. */
-	struct task_struct *result;
-	struct completion *done;
+	struct task_struct *result; /* 生成内核线程后的任务 */
+	struct completion *done; /* 通知已结束 */
 
-	struct list_head list;
+	struct list_head list; /* 链接到kthread_create_list的成员 */
 };
 
 struct kthread {
@@ -656,21 +656,21 @@ EXPORT_SYMBOL(kthread_stop);
 
 int kthreadd(void *unused)
 {
-	struct task_struct *tsk = current;
+	struct task_struct *tsk = current; /* 获取当前任务 */
 
 	/* Setup a clean context for our children to inherit. */
-	set_task_comm(tsk, "kthreadd");
-	ignore_signals(tsk);
+	set_task_comm(tsk, "kthreadd"); /* 当前任务的commom成员变量设置为"kthreadd", tsk->commom是执行任务的名称 */
+	ignore_signals(tsk); /* 将任务的信号处理操作action设置为忽略所有信号 */
 	set_cpus_allowed_ptr(tsk, housekeeping_cpumask(HK_FLAG_KTHREAD));
-	set_mems_allowed(node_states[N_MEMORY]);
+	set_mems_allowed(node_states[N_MEMORY]); /* 变更可以执行给定任务的cpu值 */
 
 	current->flags |= PF_NOFREEZE;
 	cgroup_init_kthreadd();
 
 	for (;;) {
-		set_current_state(TASK_INTERRUPTIBLE);
-		if (list_empty(&kthread_create_list))
-			schedule();
+		set_current_state(TASK_INTERRUPTIBLE); /* 设置当前任务为可执行中断 */
+		if (list_empty(&kthread_create_list)) /* 检查内核线程列表的kthread_create_list是否为空 */
+			schedule(); /* 让出处理器资源 */
 		__set_current_state(TASK_RUNNING);
 
 		spin_lock(&kthread_create_lock);

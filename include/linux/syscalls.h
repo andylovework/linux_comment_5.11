@@ -858,9 +858,9 @@ asmlinkage long sys_recvmsg(int fd, struct user_msghdr __user *msg, unsigned fla
 asmlinkage long sys_readahead(int fd, loff_t offset, size_t count);
 
 /* mm/nommu.c, also with MMU */
-asmlinkage long sys_brk(unsigned long brk);
-asmlinkage long sys_munmap(unsigned long addr, size_t len);
-asmlinkage long sys_mremap(unsigned long addr,
+asmlinkage long sys_brk(unsigned long brk); /* 用来扩大或收缩堆 */
+asmlinkage long sys_munmap(unsigned long addr, size_t len);/* 用来在内存映射区域分配虚拟页 */
+asmlinkage long sys_mremap(unsigned long addr, /*  用来释放虚拟页 */
 			   unsigned long old_len, unsigned long new_len,
 			   unsigned long flags, unsigned long new_addr);
 
