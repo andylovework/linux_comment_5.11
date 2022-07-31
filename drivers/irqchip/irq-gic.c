@@ -64,7 +64,7 @@ union gic_base {
 	void __iomem *common_base;
 	void __percpu * __iomem *percpu_base;
 };
-
+/* 描述GIC控制器的信息，整个驱动都是围绕着该结构体的初始化，驱动中将函数指针都初始化好，实际的工作是由中断信号触发，也就是在中断来临的时候去进行调 */
 struct gic_chip_data {
 	struct irq_chip chip;
 	union gic_base dist_base;
@@ -1173,7 +1173,7 @@ static int gic_init_bases(struct gic_chip_data *gic,
 	if (handle) {		/* DT/ACPI */
 		gic->domain = irq_domain_create_linear(handle, gic_irqs,
 						       &gic_irq_domain_hierarchy_ops,
-						       gic);
+						       gic); /* 分配irq＿domain，并初始化irq＿domain＿ops 结构体 */
 	} else {		/* Legacy support */
 		/*
 		 * For primary GICs, skip over SGIs.
@@ -1199,12 +1199,12 @@ static int gic_init_bases(struct gic_chip_data *gic,
 		goto error;
 	}
 
-	gic_dist_init(gic);
-	ret = gic_cpu_init(gic);
+	gic_dist_init(gic); /* 初始化GIC Distributor */
+	ret = gic_cpu_init(gic); /* 初始化GIC CPU Interface */
 	if (ret)
 		goto error;
 
-	ret = gic_pm_init(gic);
+	ret = gic_pm_init(gic); /* 初始化GIC的电源管理模块，用于Suspend和 Resume */
 	if (ret)
 		goto error;
 
@@ -1237,20 +1237,20 @@ static int __init __gic_init_bases(struct gic_chip_data *gic,
 		for (i = 0; i < NR_GIC_CPU_IF; i++)
 			gic_cpu_map[i] = 0xff;
 
-		set_handle_irq(gic_handle_irq);
+		set_handle_irq(gic_handle_irq); /* 置中断处理handler，异常处理的入口 */
 		if (static_branch_likely(&supports_deactivate_key))
 			pr_info("GIC: Using split EOI/Deactivate mode\n");
 	}
 
 	if (static_branch_likely(&supports_deactivate_key) && gic == &gic_data[0]) {
 		name = kasprintf(GFP_KERNEL, "GICv2");
-		gic_init_chip(gic, NULL, name, true);
+		gic_init_chip(gic, NULL, name, true); /* 初始化 irq＿chip 结构 */
 	} else {
 		name = kasprintf(GFP_KERNEL, "GIC-%d", (int)(gic-&gic_data[0]));
 		gic_init_chip(gic, NULL, name, false);
 	}
 
-	ret = gic_init_bases(gic, handle);
+	ret = gic_init_bases(gic, handle); /* 初始化gic中与中断相关 */
 	if (ret)
 		kfree(name);
 	else if (gic == &gic_data[0])
@@ -1465,7 +1465,7 @@ gic_of_init(struct device_node *node, struct device_node *parent)
 
 	gic = &gic_data[gic_cnt];
 
-	ret = gic_of_setup(gic, node);
+	ret = gic_of_setup(gic, node); /* 设置GIC的地址和寄存器 */
 	if (ret)
 		return ret;
 
@@ -1476,7 +1476,7 @@ gic_of_init(struct device_node *node, struct device_node *parent)
 	if (gic_cnt == 0 && !gic_check_eoimode(node, &gic->raw_cpu_base))
 		static_branch_disable(&supports_deactivate_key);
 
-	ret = __gic_init_bases(gic, &node->fwnode);
+	ret = __gic_init_bases(gic, &node->fwnode); /* 设置GIC相关基础信息 */
 	if (ret) {
 		gic_teardown(gic);
 		return ret;

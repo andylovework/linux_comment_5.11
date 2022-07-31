@@ -505,7 +505,7 @@ void __init of_irq_init(const struct of_device_id *matches)
 			goto err;
 		}
 
-		desc->irq_init_cb = match->data;
+		desc->irq_init_cb = match->data; /* 解析节点，获取回调函数 */
 		desc->dev = of_node_get(np);
 		desc->interrupt_parent = of_irq_find_parent(np);
 		if (desc->interrupt_parent == np)

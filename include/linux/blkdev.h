@@ -1840,13 +1840,13 @@ struct block_device_operations {
 	blk_qc_t (*submit_bio) (struct bio *bio);
 	int (*open) (struct block_device *, fmode_t);
 	void (*release) (struct gendisk *, fmode_t);
-	int (*rw_page)(struct block_device *, sector_t, struct page *, unsigned int);
-	int (*ioctl) (struct block_device *, fmode_t, unsigned, unsigned long);
+	int (*rw_page)(struct block_device *, sector_t, struct page *, unsigned int); /* rw_page 函数用于读写指定的页 */
+	int (*ioctl) (struct block_device *, fmode_t, unsigned, unsigned long); /* ioctl 函数用于块设备的 I/O 控制 */
 	int (*compat_ioctl) (struct block_device *, fmode_t, unsigned, unsigned long);
 	unsigned int (*check_events) (struct gendisk *disk,
 				      unsigned int clearing);
 	void (*unlock_native_capacity) (struct gendisk *);
-	int (*getgeo)(struct block_device *, struct hd_geometry *);
+	int (*getgeo)(struct block_device *, struct hd_geometry *); /* 函数用于获取磁盘信息，包括磁头、柱面和扇区等信息 */
 	int (*set_read_only)(struct block_device *bdev, bool ro);
 	/* this callback is with swap_lock and sometimes page table lock held */
 	void (*swap_slot_free_notify) (struct block_device *, unsigned long);

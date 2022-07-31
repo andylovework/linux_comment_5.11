@@ -206,7 +206,7 @@ void blkdev_show(struct seq_file *seqf, off_t offset)
  * major numbers.
  *
  * Use register_blkdev instead for any new code.
- */
+ */ /* 向内核注册新的块设备、申请设备号 */
 int __register_blkdev(unsigned int major, const char *name,
 		void (*probe)(dev_t devt))
 {

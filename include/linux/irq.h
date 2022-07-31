@@ -501,28 +501,28 @@ static inline irq_hw_number_t irqd_to_hwirq(struct irq_data *d)
  * @irq_nmi_setup:	function called from core code before enabling an NMI
  * @irq_nmi_teardown:	function called from core code after disabling an NMI
  * @flags:		chip specific flags
- */
+ */ /* 描述的是中断控制器的底层操作函数集，这些函数集最终完成对控制器硬件的操作 */
 struct irq_chip {
-	struct device	*parent_device;
-	const char	*name;
-	unsigned int	(*irq_startup)(struct irq_data *data);
-	void		(*irq_shutdown)(struct irq_data *data);
-	void		(*irq_enable)(struct irq_data *data);
-	void		(*irq_disable)(struct irq_data *data);
+	struct device	*parent_device; /* 指向父设备 */
+	const char	*name; /* proc/interrupts中显示的名字 */
+	unsigned int	(*irq_startup)(struct irq_data *data); /* 启动中断，如果设置成NULL，则默认为enable */
+	void		(*irq_shutdown)(struct irq_data *data); /* 关闭中断，如果设置成NULL，则默认为disable */
+	void		(*irq_enable)(struct irq_data *data); /* 中断使能，如果设置成NULL，则默认为chip->unmask */
+	void		(*irq_disable)(struct irq_data *data); /* 中断禁止 */
 
-	void		(*irq_ack)(struct irq_data *data);
-	void		(*irq_mask)(struct irq_data *data);
-	void		(*irq_mask_ack)(struct irq_data *data);
-	void		(*irq_unmask)(struct irq_data *data);
-	void		(*irq_eoi)(struct irq_data *data);
+	void		(*irq_ack)(struct irq_data *data); /* 开始新的中断 */
+	void		(*irq_mask)(struct irq_data *data); /* 中断源屏蔽 */
+	void		(*irq_mask_ack)(struct irq_data *data); /* 应答并屏蔽中断 */
+	void		(*irq_unmask)(struct irq_data *data); /* 解除中断屏蔽 */
+	void		(*irq_eoi)(struct irq_data *data); /* 中断处理结束后调用 */
 
-	int		(*irq_set_affinity)(struct irq_data *data, const struct cpumask *dest, bool force);
-	int		(*irq_retrigger)(struct irq_data *data);
-	int		(*irq_set_type)(struct irq_data *data, unsigned int flow_type);
-	int		(*irq_set_wake)(struct irq_data *data, unsigned int on);
+	int		(*irq_set_affinity)(struct irq_data *data, const struct cpumask *dest, bool force); /* 在SMP中设置CPU亲和力 */
+	int		(*irq_retrigger)(struct irq_data *data); /* 重新发送中断到CPU */
+	int		(*irq_set_type)(struct irq_data *data, unsigned int flow_type); /* 设置中断触发类型 */
+	int		(*irq_set_wake)(struct irq_data *data, unsigned int on); /* 使能/禁止电源管理中的唤醒功能 */
 
-	void		(*irq_bus_lock)(struct irq_data *data);
-	void		(*irq_bus_sync_unlock)(struct irq_data *data);
+	void		(*irq_bus_lock)(struct irq_data *data); /* 慢速芯片总线上的锁 */
+	void		(*irq_bus_sync_unlock)(struct irq_data *data); /* 同步释放慢速总线芯片的锁 */
 
 	void		(*irq_cpu_online)(struct irq_data *data);
 	void		(*irq_cpu_offline)(struct irq_data *data);

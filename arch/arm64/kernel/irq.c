@@ -106,9 +106,9 @@ int __init set_handle_fiq(void (*handle_fiq)(struct pt_regs *))
 
 void __init init_IRQ(void)
 {
-	init_irq_stacks();
+	init_irq_stacks(); /* 分配per cpu中断栈。此处定义了CONFIG_VMAP_STACK，则中断栈将从vmalloc区域分配，每个cpu的中断栈指针将保存在全局per-cpu变量irq_stack_ptr中 */
 	init_irq_scs();
-	irqchip_init();
+	irqchip_init(); /* 初始化irq控制器，并注册irq_domain,其中of_irq_init扫描__irqchip_of_table，匹配DTB中定义的中断控制器，匹配成功则调用中断控制器设置的初始化函数 */
 
 	if (system_uses_irq_prio_masking()) {
 		/*

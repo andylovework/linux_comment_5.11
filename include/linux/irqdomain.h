@@ -154,14 +154,14 @@ struct irq_domain_chip_generic;
  * @revmap_tree: Radix map tree for hwirqs that don't fit in the linear map
  * @revmap_mutex: Lock for the revmap
  * @revmap: Linear table of irq_data pointers
- */
+ */ /* 用于硬件中断号和Linux IRQ 中断号（virq，虚拟中断号）之间的映射 */
 struct irq_domain {
-	struct list_head link;
-	const char *name;
-	const struct irq_domain_ops *ops;
-	void *host_data;
+	struct list_head link; /* 用于添加到全局链表irq_domain_list中 */
+	const char *name; /* IRQ domain的名字 */
+	const struct irq_domain_ops *ops; /* IRQ domain映射操作函数集 */
+	void *host_data; /* 在GIC驱动中，指向了irq_gic_data */
 	unsigned int flags;
-	unsigned int mapcount;
+	unsigned int mapcount; /* 映射中断的个数 */
 
 	/* Optional data */
 	struct fwnode_handle *fwnode;
@@ -172,11 +172,11 @@ struct irq_domain {
 #endif
 
 	/* reverse map data. The linear map gets appended to the irq_domain */
-	irq_hw_number_t hwirq_max;
-	unsigned int revmap_size;
-	struct radix_tree_root revmap_tree;
+	irq_hw_number_t hwirq_max; /* IRQ domain支持中断数量的最大值 */
+	unsigned int revmap_size;  /* 线性映射的大小 */
+	struct radix_tree_root revmap_tree; /* Radix Tree映射的根节点 */
 	struct mutex revmap_mutex;
-	struct irq_data __rcu *revmap[];
+	struct irq_data __rcu *revmap[]; /* 线性映射用到的查找表 */
 };
 
 /* Irq domain flags */
