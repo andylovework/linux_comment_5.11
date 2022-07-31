@@ -337,7 +337,7 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
 
 	arm64_memblock_init();
 
-	paging_init();
+	paging_init(); /* 执行分页相关准备工作 */
 
 	acpi_table_upgrade();
 
@@ -361,7 +361,7 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
 		psci_acpi_init();
 
 	init_bootcpu_ops();
-	smp_init_cpus();
+	smp_init_cpus(); /* 在系统内置CPU位图cpu_possible_map中对各核心做标记 */
 	smp_build_mpidr_hash();
 
 	/* Init percpu seeds for random tags after cpus are set up. */

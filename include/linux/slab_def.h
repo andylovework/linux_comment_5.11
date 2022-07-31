@@ -10,14 +10,14 @@
  */
 
 struct kmem_cache {
-	struct array_cache __percpu *cpu_cache;
+	struct array_cache __percpu *cpu_cache; /* 表示本地CPU的对象缓冲池 */
 
 /* 1) Cache tunables. Protected by slab_mutex */
 	unsigned int batchcount;
-	unsigned int limit;
-	unsigned int shared;
+	unsigned int limit; /* 当本地对象缓冲池空闲对象数目大于limit时会主动释放batchcount对象 */
+	unsigned int shared; /* 用于多核系统 */
 
-	unsigned int size;
+	unsigned int size; /* 对象长度，此长度加上align对齐字节 */
 	struct reciprocal_value reciprocal_buffer_size;
 /* 2) touched by every alloc & free from the backend */
 

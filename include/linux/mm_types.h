@@ -83,10 +83,10 @@ struct page {
 			 * lruvec->lru_lock.  Sometimes used as a generic list
 			 * by the page owner.
 			 */
-			struct list_head lru;
+			struct list_head lru; /* 为LRU链表，该链表会根据页面不同的用途挂载到不同的链表， 如在空闲时刻，被buddy系统管理时，会挂接到buffy的free 链表中。如果页面被分配，则会根据页面的激活状态，挂接到active list链表中 */
 			/* See page-flags.h for PAGE_MAPPING_FLAGS */
-			struct address_space *mapping;
-			pgoff_t index;		/* Our offset within mapping. */
+			struct address_space *mapping; /* 当页面被映射时 指向映射的地址空间 */
+			pgoff_t index;		/* Our offset within mapping. 该字段是一个复用字段。当该页面被文件映射时，代表偏移量。为匿名映射时，保存的是页迁移类型migratetype(见set_pcppage_migratetype()函数） */
 			/**
 			 * @private: Mapping-private opaque data.
 			 * Usually used for buffer_heads if PagePrivate.
@@ -107,13 +107,13 @@ struct page {
 			 * @dma_addr: might require a 64-bit value on
 			 * 32-bit architectures.
 			 */
-			unsigned long dma_addr[2];
+			unsigned long dma_addr[2]; /* 如果该页被用作DMA映射，dma_addr_t则代表的是映射的一个总线地址 */
 		};
 		struct {	/* slab, slob and slub */
 			union {
-				struct list_head slab_list;
+				struct list_head slab_list; /* 指向的是slab list链表 */
 				struct {	/* Partial pages */
-					struct page *next;
+					struct page *next; /* 在slub中分配使用 */
 #ifdef CONFIG_64BIT
 					int pages;	/* Nr of pages left */
 					int pobjects;	/* Approximate count */
@@ -123,7 +123,7 @@ struct page {
 #endif
 				};
 			};
-			struct kmem_cache *slab_cache; /* not slob */
+			struct kmem_cache *slab_cache; /* not slob 指向的是slab缓存描述符 */
 			/* Double-word boundary */
 			void *freelist;		/* first free object */
 			union {
@@ -311,14 +311,14 @@ struct vm_userfaultfd_ctx {};
 struct vm_area_struct {
 	/* The first cache line has the info for VMA tree walking. */
 
-	unsigned long vm_start;		/* Our start address within vm_mm. */
+	unsigned long vm_start;		/* Our start address within vm_mm.起始地址 */
 	unsigned long vm_end;		/* The first byte after our end address
-					   within vm_mm. */
+					   within vm_mm.结束地址，区间是[起始地址，结束地址) */
 
 	/* linked list of VM areas per task, sorted by address */
-	struct vm_area_struct *vm_next, *vm_prev;
+	struct vm_area_struct *vm_next, *vm_prev; /* 虚拟内存区域链表，按起始地址排序 */
 
-	struct rb_node vm_rb;
+	struct rb_node vm_rb; /* 红黑树节点 */
 
 	/*
 	 * Largest free memory gap in bytes to the left of this VMA.
@@ -330,13 +330,13 @@ struct vm_area_struct {
 
 	/* Second cache line starts here. */
 
-	struct mm_struct *vm_mm;	/* The address space we belong to. */
+	struct mm_struct *vm_mm;	/* The address space we belong to.指向内存描述符，即虚拟内存区域所属的用户虚拟地址空间 */
 
 	/*
 	 * Access permissions of this VMA.
 	 * See vmf_insert_mixed_prot() for discussion.
 	 */
-	pgprot_t vm_page_prot;
+	pgprot_t vm_page_prot; /* 保护位，即访问权限 */
 	unsigned long vm_flags;		/* Flags, see mm.h. */
 
 	/*
@@ -344,8 +344,8 @@ struct vm_area_struct {
 	 * linkage into the address_space->i_mmap interval tree.
 	 */
 	struct {
-		struct rb_node rb;
-		unsigned long rb_subtree_last;
+		struct rb_node rb;              /* 为了支持查询一个文件区间被映射到那些虚拟内存区域，把一个文件映射到的所有虚拟内存区域加入 */
+		unsigned long rb_subtree_last;  /* 该文件的地址空间结构体address_space成员i_mmap指向的区间树 */
 	} shared;
 
 	/*
@@ -356,15 +356,15 @@ struct vm_area_struct {
 	 */
 	struct list_head anon_vma_chain; /* Serialized by mmap_lock &
 					  * page_table_lock */
-	struct anon_vma *anon_vma;	/* Serialized by page_table_lock */
+	struct anon_vma *anon_vma;	/* Serialized by page_table_lock，指向一个anon_vma实例，结构体anon_vma用来组织匿名页被映射到的所有虚拟地址空间 */
 
 	/* Function pointers to deal with this struct. */
-	const struct vm_operations_struct *vm_ops;
+	const struct vm_operations_struct *vm_ops; /* 虚拟内存操作集合 */
 
 	/* Information about our backing store: */
 	unsigned long vm_pgoff;		/* Offset (within vm_file) in PAGE_SIZE
-					   units */
-	struct file * vm_file;		/* File we map to (can be NULL). */
+					   units 文件偏移，单位是页 */
+	struct file * vm_file;		/* File we map to (can be NULL).文件，如果是私有的匿名映射，该成员是空指针 */
 	void * vm_private_data;		/* was vm_pte (shared mem) */
 
 #ifdef CONFIG_SWAP

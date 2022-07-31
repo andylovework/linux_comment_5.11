@@ -44,7 +44,7 @@
 #include <linux/uaccess.h>
 #include "util.h"
 
-/* one msq_queue structure for each present queue on the system */
+/* one msq_queue structure for each present queue on the system 描述消息队列头 */
 struct msg_queue {
 	struct kern_ipc_perm q_perm;
 	time64_t q_stime;		/* last msgsnd time */

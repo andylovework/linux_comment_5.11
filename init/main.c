@@ -670,7 +670,7 @@ noinline void __ref rest_init(void)
 	struct task_struct *tsk;
 	int pid;
 
-	rcu_scheduler_starting();
+	rcu_scheduler_starting(); /* 将rcu_scheduler_active变量设置为1，表示rcu机制已被激活 */
 	/*
 	 * We need to spawn init first so that it obtains pid 1, however
 	 * the init task will end up wanting to create kthreads, which, if
@@ -683,7 +683,7 @@ noinline void __ref rest_init(void)
 	 * CPUs for init to the non isolated CPUs.
 	 */
 	rcu_read_lock();
-	tsk = find_task_by_pid_ns(pid, &init_pid_ns);
+	tsk = find_task_by_pid_ns(pid, &init_pid_ns); /* 用已分配的PID值从PID散列表中获得显示进程信息的stask结构体 */
 	tsk->flags |= PF_NO_SETAFFINITY;
 	set_cpus_allowed_ptr(tsk, cpumask_of(smp_processor_id()));
 	rcu_read_unlock();
@@ -1384,11 +1384,11 @@ static void __init do_initcalls(void)
 static void __init do_basic_setup(void)
 {
 	cpuset_init_smp();
-	driver_init();
-	init_irq_proc();
+	driver_init(); /* 初始化驱动模式 */
+	init_irq_proc(); /* 构建/proc/irq */
 	do_ctors();
 	usermodehelper_enable();
-	do_initcalls();
+	do_initcalls(); /* 调用initcall区域的函数 */
 }
 
 static void __init do_pre_smp_initcalls(void)
@@ -1412,7 +1412,7 @@ static int run_init_process(const char *init_filename)
 	pr_debug("  with environment:\n");
 	for (p = envp_init; *p; p++)
 		pr_debug("    %s\n", *p);
-	return kernel_execve(init_filename, argv_init, envp_init);
+	return kernel_execve(init_filename, argv_init, envp_init); /* 来调用用户空间的程序 */
 }
 
 static int try_to_run_init_process(const char *init_filename)
@@ -1590,7 +1590,7 @@ static noinline void __init kernel_init_freeable(void)
 	/* Initialize page ext after all struct pages are initialized. */
 	page_ext_init();
 
-	do_basic_setup();
+	do_basic_setup();  /* 初始化设备驱动 */
 
 	kunit_run_all_tests();
 
@@ -1603,7 +1603,7 @@ static noinline void __init kernel_init_freeable(void)
 	 */
 	if (init_eaccess(ramdisk_execute_command) != 0) {
 		ramdisk_execute_command = NULL;
-		prepare_namespace();
+		prepare_namespace(); /* 挂载根文件系统 */
 	}
 
 	/*

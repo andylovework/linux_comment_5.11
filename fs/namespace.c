@@ -625,8 +625,8 @@ struct mount *__lookup_mnt(struct vfsmount *mnt, struct dentry *dentry)
 	struct hlist_head *head = m_hash(mnt, dentry);
 	struct mount *p;
 
-	hlist_for_each_entry_rcu(p, head, mnt_hash)
-		if (&p->mnt_parent->mnt == mnt && p->mnt_mountpoint == dentry)
+	hlist_for_each_entry_rcu(p, head, mnt_hash) /* 从哈希表项对应的链表中查找遍历链表的每个节点 */
+		if (&p->mnt_parent->mnt == mnt && p->mnt_mountpoint == dentry) /* 节点的mount实例的父mount为mnt 且mount实例的挂载点为 dentry */
 			return p;
 	return NULL;
 }
@@ -656,7 +656,7 @@ struct vfsmount *lookup_mnt(const struct path *path)
 	rcu_read_lock();
 	do {
 		seq = read_seqbegin(&mount_lock);
-		child_mnt = __lookup_mnt(path->mnt, path->dentry);
+		child_mnt = __lookup_mnt(path->mnt, path->dentry); /* 委托__lookup_mnt */
 		m = child_mnt ? &child_mnt->mnt : NULL;
 	} while (!legitimize_mnt(m, seq));
 	rcu_read_unlock();
@@ -733,26 +733,26 @@ static struct mountpoint *get_mountpoint(struct dentry *dentry)
 	struct mountpoint *mp, *new = NULL;
 	int ret;
 
-	if (d_mountpoint(dentry)) {
+	if (d_mountpoint(dentry)) { /* dentry为挂载点 （当dentry为挂载点时 会设置dentry->d_flags 的DCACHE_MOUNTED标志） */
 		/* might be worth a WARN_ON() */
 		if (d_unlinked(dentry))
 			return ERR_PTR(-ENOENT);
 mountpoint:
 		read_seqlock_excl(&mount_lock);
-		mp = lookup_mountpoint(dentry);
+		mp = lookup_mountpoint(dentry); /* 从mountpoint hash表 查找mountpoint */
 		read_sequnlock_excl(&mount_lock);
 		if (mp)
 			goto done;
 	}
 
-	if (!new)
+	if (!new) /* mountpoint哈希表中没有找到    则分配        */
 		new = kmalloc(sizeof(struct mountpoint), GFP_KERNEL);
 	if (!new)
 		return ERR_PTR(-ENOMEM);
 
 
 	/* Exactly one processes may set d_mounted */
-	ret = d_set_mounted(dentry);
+	ret = d_set_mounted(dentry); /* 设置dentry为挂载点 */
 
 	/* Someone else set d_mounted? */
 	if (ret == -EBUSY)
@@ -765,10 +765,10 @@ mountpoint:
 
 	/* Add the new mountpoint to the hash table */
 	read_seqlock_excl(&mount_lock);
-	new->m_dentry = dget(dentry);
+	new->m_dentry = dget(dentry); /* 设置mountpoint实例的m_dentry 指向dentry */
 	new->m_count = 1;
 	hlist_add_head(&new->m_hash, mp_hash(dentry));
-	INIT_HLIST_HEAD(&new->m_list);
+	INIT_HLIST_HEAD(&new->m_list); /* 初始化 挂载链表mount实例会加入到这个链表 */
 	read_sequnlock_excl(&mount_lock);
 
 	mp = new;
@@ -968,7 +968,7 @@ struct vfsmount *vfs_create_mount(struct fs_context *fc)
 	if (!fc->root)
 		return ERR_PTR(-EINVAL);
 
-	mnt = alloc_vfsmnt(fc->source ?: "none");
+	mnt = alloc_vfsmnt(fc->source ?: "none"); /* 分配mount实例 */
 	if (!mnt)
 		return ERR_PTR(-ENOMEM);
 
@@ -976,10 +976,10 @@ struct vfsmount *vfs_create_mount(struct fs_context *fc)
 		mnt->mnt.mnt_flags = MNT_INTERNAL;
 
 	atomic_inc(&fc->root->d_sb->s_active);
-	mnt->mnt.mnt_sb		= fc->root->d_sb;
-	mnt->mnt.mnt_root	= dget(fc->root);
-	mnt->mnt_mountpoint	= mnt->mnt.mnt_root;
-	mnt->mnt_parent		= mnt;
+	mnt->mnt.mnt_sb		= fc->root->d_sb; /* mount关联超级块 (使用vfsmount关联) */
+	mnt->mnt.mnt_root	= dget(fc->root); /* mount关联根dentry (使用vfsmount关联) */ 
+	mnt->mnt_mountpoint	= mnt->mnt.mnt_root; /* mount关联挂载点 （临时指向根dentry，后面会指向真正的挂载点，以至于对用户可见) */
+	mnt->mnt_parent		= mnt; /* 父挂载指向自己 (临时指向 后面会设置)  */
 
 	lock_mount_hash();
 	list_add_tail(&mnt->mnt_instance, &mnt->mnt.mnt_sb->s_mounts);
@@ -2213,16 +2213,16 @@ static int attach_recursive_mnt(struct mount *source_mnt,
 static struct mountpoint *lock_mount(struct path *path)
 {
 	struct vfsmount *mnt;
-	struct dentry *dentry = path->dentry;
+	struct dentry *dentry = path->dentry; /* //获得挂载目录的dentry */
 retry:
-	inode_lock(dentry->d_inode);
-	if (unlikely(cant_mount(dentry))) {
+	inode_lock(dentry->d_inode); /* 写方式申请 inode的读写信号量  */
+	if (unlikely(cant_mount(dentry))) { /* 判断挂载目录能否被挂载 */
 		inode_unlock(dentry->d_inode);
 		return ERR_PTR(-ENOENT);
 	}
-	namespace_lock();
-	mnt = lookup_mnt(path);
-	if (likely(!mnt)) {
+	namespace_lock(); /* 写方式申请 命名空间读写信号量 */
+	mnt = lookup_mnt(path); /* 查找挂载在path上的第一个子mount */
+	if (likely(!mnt)) { /* mnt为空 说明没有文件系统挂载在这个path上 */
 		struct mountpoint *mp = get_mountpoint(dentry);
 		if (IS_ERR(mp)) {
 			namespace_unlock();
@@ -2231,11 +2231,11 @@ retry:
 		}
 		return mp;
 	}
-	namespace_unlock();
-	inode_unlock(path->dentry->d_inode);
+	namespace_unlock(); /* 释放命名空间读写信号量 */
+	inode_unlock(path->dentry->d_inode); /* 释放 inode的读写信号量 */
 	path_put(path);
-	path->mnt = mnt;
-	dentry = path->dentry = dget(mnt->mnt_root);
+	path->mnt = mnt; /* path->mnt指向找到的vfsmount */
+	dentry = path->dentry = dget(mnt->mnt_root); /* /path->dentry指向找到的vfsmount的根dentry */
 	goto retry;
 }
 
@@ -2782,9 +2782,9 @@ static int do_move_mount_old(struct path *path, const char *old_name)
 	path_put(&old_path);
 	return err;
 }
-
-/*
- * add a mount into a namespace's mount tree
+ /*
+ * 1,lock_mount确定本次挂载要挂载到哪个父挂载实例parent的哪个挂载点mp上. 2,把newmnt挂载到parent的mp下，完成newmnt到全局的安装
+ * add a mount into a namespace's mount tree:
  */
 static int do_add_mount(struct mount *newmnt, struct mountpoint *mp,
 			struct path *path, int mnt_flags)
@@ -2802,16 +2802,16 @@ static int do_add_mount(struct mount *newmnt, struct mountpoint *mp,
 			return -EINVAL;
 	}
 
-	/* Refuse the same filesystem on the same mount point */
+	/* Refuse the same filesystem on the same mount point，不允许同一文件系统挂载到同一个挂载点 */
 	if (path->mnt->mnt_sb == newmnt->mnt.mnt_sb &&
 	    path->mnt->mnt_root == path->dentry)
 		return -EBUSY;
-
+    /* 新文件系统的挂载实例的根inode不应该是一个符号链接 */
 	if (d_is_symlink(newmnt->mnt.mnt_root))
 		return -EINVAL;
 
 	newmnt->mnt.mnt_flags = mnt_flags;
-	return graft_tree(newmnt, parent, mp);
+	return graft_tree(newmnt, parent, mp); /* 最后graft_tree就是把newmnt加入到全局文件系统树中 */
 }
 
 static bool mount_too_revealing(const struct super_block *sb, int *new_mnt_flags);
@@ -2825,7 +2825,7 @@ static int do_new_mount_fc(struct fs_context *fc, struct path *mountpoint,
 {
 	struct vfsmount *mnt;
 	struct mountpoint *mp;
-	struct super_block *sb = fc->root->d_sb;
+	struct super_block *sb = fc->root->d_sb; /* 获得vfs的超级块 （之前已经构建好） */
 	int error;
 
 	error = security_sb_kern_mount(sb);
@@ -2839,18 +2839,18 @@ static int do_new_mount_fc(struct fs_context *fc, struct path *mountpoint,
 
 	up_write(&sb->s_umount);
 
-	mnt = vfs_create_mount(fc);
+	mnt = vfs_create_mount(fc); /* 为一个已配置的超级块 分配mount实例 */
 	if (IS_ERR(mnt))
 		return PTR_ERR(mnt);
 
 	mnt_warn_timestamp_expiry(mountpoint, mnt);
 
-	mp = lock_mount(mountpoint);
+	mp = lock_mount(mountpoint); /* 寻找挂载点 如果挂载目录是挂载点（已经有文件系统挂载其上），则将最后一次挂载的文件系统根目录作为挂载点 */
 	if (IS_ERR(mp)) {
 		mntput(mnt);
 		return PTR_ERR(mp);
 	}
-	error = do_add_mount(real_mount(mnt), mp, mountpoint, mnt_flags);
+	error = do_add_mount(real_mount(mnt), mp, mountpoint, mnt_flags); /* 准备将mnt结构加入全局文件系统树 */
 	unlock_mount(mp);
 	if (error < 0)
 		mntput(mnt);
@@ -2872,7 +2872,7 @@ static int do_new_mount(struct path *path, const char *fstype, int sb_flags,
 	if (!fstype)
 		return -EINVAL;
 
-	type = get_fs_type(fstype);
+	type = get_fs_type(fstype); /* 根据传递的文件系统名  查找已经注册的文件系统类型 */
 	if (!type)
 		return -ENODEV;
 
@@ -2887,7 +2887,7 @@ static int do_new_mount(struct path *path, const char *fstype, int sb_flags,
 		}
 	}
 
-	fc = fs_context_for_mount(type, sb_flags);
+	fc = fs_context_for_mount(type, sb_flags); /* 为挂载分配文件系统上下文 struct fs_context */
 	put_filesystem(type);
 	if (IS_ERR(fc))
 		return PTR_ERR(fc);
@@ -2898,13 +2898,13 @@ static int do_new_mount(struct path *path, const char *fstype, int sb_flags,
 	if (!err && name)
 		err = vfs_parse_fs_string(fc, "source", name, strlen(name));
 	if (!err)
-		err = parse_monolithic_mount_data(fc, data);
+		err = parse_monolithic_mount_data(fc, data); /* 调用fc->ops->parse_monolithic解析挂载选项 */
 	if (!err && !mount_capable(fc))
 		err = -EPERM;
 	if (!err)
-		err = vfs_get_tree(fc);
+		err = vfs_get_tree(fc); /* 检查是否有挂载权限 */
 	if (!err)
-		err = do_new_mount_fc(fc, path, mnt_flags);
+		err = do_new_mount_fc(fc, path, mnt_flags); /* 创建mount实例关联挂载点和超级块添加到命名空间的挂载树中 */
 
 	put_fs_context(fc);
 	return err;

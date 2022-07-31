@@ -490,9 +490,9 @@ void flush_signals(struct task_struct *t)
 	unsigned long flags;
 
 	spin_lock_irqsave(&t->sighand->siglock, flags);
-	clear_tsk_thread_flag(t, TIF_SIGPENDING);
-	flush_sigqueue(&t->pending);
-	flush_sigqueue(&t->signal->shared_pending);
+	clear_tsk_thread_flag(t, TIF_SIGPENDING); /* 从任务获得thread_info结构体，在线程信息标签(thread information flag)中清除TIF_SIGPENDING标签位 */
+	flush_sigqueue(&t->pending); /* 调用flush_sigqueue()函数全部释放待处理信号 */
+	flush_sigqueue(&t->signal->shared_pending); /* 将任务共享的待处理(t->signal->shared_pending)从所有列表中删除 */
 	spin_unlock_irqrestore(&t->sighand->siglock, flags);
 }
 EXPORT_SYMBOL(flush_signals);

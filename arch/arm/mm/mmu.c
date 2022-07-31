@@ -1719,7 +1719,7 @@ void __init paging_init(const struct machine_desc *mdesc)
 	pr_debug("physical kernel sections: 0x%08x-0x%08x\n",
 		 kernel_sec_start, kernel_sec_end);
 
-	prepare_page_table();
+	prepare_page_table(); /* 准备页表阶段，将对应于内核映像下方及内核空间的页目录的pmd段均清空为0 */
 	map_lowmem();
 	memblock_set_current_limit(arm_lowmem_limit);
 	pr_debug("lowmem limit is %08llx\n", (long long)arm_lowmem_limit);
@@ -1730,8 +1730,8 @@ void __init paging_init(const struct machine_desc *mdesc)
 	map_kernel();
 	dma_contiguous_remap();
 	early_fixmap_shutdown();
-	devicemaps_init(mdesc);
-	kmap_init();
+	devicemaps_init(mdesc); /* 对向量表进行映射，还执行使用设备时必须操作 */
+	kmap_init(); /* 只在已设置CONFIG_HIGHMEM时执行,ARM中对高端内存的支持设置Experimental */
 	tcm_init();
 
 	top_pmd = pmd_off_k(0xffff0000);

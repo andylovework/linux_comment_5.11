@@ -733,7 +733,7 @@ static void __init setup_processor(void)
 	elf_hwcap_fixup();
 
 	cacheid_init();
-	cpu_init();
+	cpu_init(); /* 按IRQ、ABORT、SVC、UND模式指定要使用的栈空间 */
 }
 
 void __init dump_machine_table(void)

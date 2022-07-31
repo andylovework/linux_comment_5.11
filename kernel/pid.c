@@ -408,7 +408,7 @@ struct task_struct *pid_task(struct pid *pid, enum pid_type type)
 EXPORT_SYMBOL(pid_task);
 
 /*
- * Must be called under rcu_read_lock().
+ * Must be called under rcu_read_lock(). /* 用已分配的PID值从PID散列表中获得显示进程信息的stask结构体 */
  */
 struct task_struct *find_task_by_pid_ns(pid_t nr, struct pid_namespace *ns)
 {

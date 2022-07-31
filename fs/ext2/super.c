@@ -806,9 +806,9 @@ static unsigned long descriptor_loc(struct super_block *sb,
 static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 {
 	struct dax_device *dax_dev = fs_dax_get_by_bdev(sb->s_bdev);
-	struct buffer_head * bh;
-	struct ext2_sb_info * sbi;
-	struct ext2_super_block * es;
+	struct buffer_head * bh; /* 缓冲区头记录读取的磁盘超级块 */
+	struct ext2_sb_info * sbi; /* 内存的ext2 超级块信息 */
+	struct ext2_super_block * es; /* 磁盘上的超级块信息 */
 	struct inode *root;
 	unsigned long block;
 	unsigned long sb_block = get_sb_block(&data);
@@ -823,7 +823,7 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 	int err;
 	struct ext2_mount_options opts;
 
-	sbi = kzalloc(sizeof(*sbi), GFP_KERNEL);
+	sbi = kzalloc(sizeof(*sbi), GFP_KERNEL); /* 分配内存的ext2 超级块信息结构 */
 	if (!sbi)
 		goto failed;
 
@@ -833,7 +833,7 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 		kfree(sbi);
 		goto failed;
 	}
-	sb->s_fs_info = sbi;
+	sb->s_fs_info = sbi; /* vfs的超级块的s_fs_info指向内存的ext2 超级块信息结构 */
 	sbi->s_sb_block = sb_block;
 	sbi->s_daxdev = dax_dev;
 
@@ -864,7 +864,7 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 		logic_sb_block = sb_block;
 	}
 
-	if (!(bh = sb_bread(sb, logic_sb_block))) {
+	if (!(bh = sb_bread(sb, logic_sb_block))) { /* 读取磁盘上的超级块到内存的 使用buffer_head关联内存缓冲区和磁盘扇区 */
 		ext2_msg(sb, KERN_ERR, "error: unable to read superblock");
 		goto failed_sbi;
 	}
@@ -872,11 +872,11 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 	 * Note: s_es must be initialized as soon as possible because
 	 *       some ext2 macro-instructions depend on its value
 	 */
-	es = (struct ext2_super_block *) (((char *)bh->b_data) + offset);
-	sbi->s_es = es;
-	sb->s_magic = le16_to_cpu(es->s_magic);
+	es = (struct ext2_super_block *) (((char *)bh->b_data) + offset); /* 转换为struct ext2_super_block 结构 */
+	sbi->s_es = es; /* 内存的ext2 超级块信息结构的 s_es指向真正的ext2磁盘超级块信息结构 */
+	sb->s_magic = le16_to_cpu(es->s_magic); /* 获得文件系统魔数ext2为0xEF53  */
 
-	if (sb->s_magic != EXT2_SUPER_MAGIC)
+	if (sb->s_magic != EXT2_SUPER_MAGIC) /* 验证魔数是否正确 */
 		goto cantfind_ext2;
 
 	opts.s_mount_opt = 0;
@@ -946,7 +946,7 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 		goto failed_mount;
 	}
 
-	blocksize = BLOCK_SIZE << le32_to_cpu(sbi->s_es->s_log_block_size);
+	blocksize = BLOCK_SIZE << le32_to_cpu(sbi->s_es->s_log_block_size);  /* 获得磁盘读取的块大小 */
 
 	if (test_opt(sb, DAX)) {
 		if (!bdev_dax_supported(sb->s_bdev, blocksize)) {
@@ -957,7 +957,7 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 	}
 
 	/* If the blocksize doesn't match, re-read the thing.. */
-	if (sb->s_blocksize != blocksize) {
+	if (sb->s_blocksize != blocksize) {  /* 块大小不匹配需要重新读取超级块 */
 		brelse(bh);
 
 		if (!sb_set_blocksize(sb, blocksize)) {
@@ -968,7 +968,7 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 
 		logic_sb_block = (sb_block*BLOCK_SIZE) / blocksize;
 		offset = (sb_block*BLOCK_SIZE) % blocksize;
-		bh = sb_bread(sb, logic_sb_block);
+		bh = sb_bread(sb, logic_sb_block); /* 重新读取超级块 */
 		if(!bh) {
 			ext2_msg(sb, KERN_ERR, "error: couldn't read"
 				"superblock on 2nd try");
@@ -982,11 +982,11 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 		}
 	}
 
-	sb->s_maxbytes = ext2_max_size(sb->s_blocksize_bits);
+	sb->s_maxbytes = ext2_max_size(sb->s_blocksize_bits); /* 设置最大文件大小 */
 	sb->s_max_links = EXT2_LINK_MAX;
 	sb->s_time_min = S32_MIN;
 	sb->s_time_max = S32_MAX;
-
+    /* 读取或设置 inode大小和第一个inode号  */
 	if (le32_to_cpu(es->s_rev_level) == EXT2_GOOD_OLD_REV) {
 		sbi->s_inode_size = EXT2_GOOD_OLD_INODE_SIZE;
 		sbi->s_first_ino = EXT2_GOOD_OLD_FIRST_INO;
@@ -1009,19 +1009,19 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 		goto cantfind_ext2;
 	sbi->s_frags_per_block = sb->s_blocksize / sbi->s_frag_size;
 
-	sbi->s_blocks_per_group = le32_to_cpu(es->s_blocks_per_group);
+	sbi->s_blocks_per_group = le32_to_cpu(es->s_blocks_per_group); /* 赋值每个块组 块个数 */
 	sbi->s_frags_per_group = le32_to_cpu(es->s_frags_per_group);
-	sbi->s_inodes_per_group = le32_to_cpu(es->s_inodes_per_group);
+	sbi->s_inodes_per_group = le32_to_cpu(es->s_inodes_per_group); /* 赋值每个块组 inode个数 */
 
-	sbi->s_inodes_per_block = sb->s_blocksize / EXT2_INODE_SIZE(sb);
+	sbi->s_inodes_per_block = sb->s_blocksize / EXT2_INODE_SIZE(sb); /* 赋值每个块 inode个数 */
 	if (sbi->s_inodes_per_block == 0 || sbi->s_inodes_per_group == 0)
 		goto cantfind_ext2;
 	sbi->s_itb_per_group = sbi->s_inodes_per_group /
 					sbi->s_inodes_per_block;
 	sbi->s_desc_per_block = sb->s_blocksize /
-					sizeof (struct ext2_group_desc);
-	sbi->s_sbh = bh;
-	sbi->s_mount_state = le16_to_cpu(es->s_state);
+					sizeof (struct ext2_group_desc); /* 赋值每个块 块组描述符个数 */
+	sbi->s_sbh = bh; /* 赋值读取的超级块缓冲区 */
+	sbi->s_mount_state = le16_to_cpu(es->s_state); /* 赋值挂载状态 */
 	sbi->s_addr_per_block_bits =
 		ilog2 (EXT2_ADDR_PER_BLOCK(sb));
 	sbi->s_desc_per_block_bits =
@@ -1072,7 +1072,7 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 		   EXT2_DESC_PER_BLOCK(sb);
 	sbi->s_group_desc = kmalloc_array(db_count,
 					   sizeof(struct buffer_head *),
-					   GFP_KERNEL);
+					   GFP_KERNEL); /* 分配块组描述符 bh数组 */
 	if (sbi->s_group_desc == NULL) {
 		ret = -ENOMEM;
 		ext2_msg(sb, KERN_ERR, "error: not enough memory");
@@ -1085,9 +1085,9 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 		ext2_msg(sb, KERN_ERR, "error: not enough memory");
 		goto failed_mount_group_desc;
 	}
-	for (i = 0; i < db_count; i++) {
+	for (i = 0; i < db_count; i++) { /* 读取块组描述符 */
 		block = descriptor_loc(sb, logic_sb_block, i);
-		sbi->s_group_desc[i] = sb_bread(sb, block);
+		sbi->s_group_desc[i] = sb_bread(sb, block); /* 读取的 块组描述符缓冲区保存 到sbi->s_group_desc[i] */
 		if (!sbi->s_group_desc[i]) {
 			for (j = 0; j < i; j++)
 				brelse (sbi->s_group_desc[j]);
@@ -1146,7 +1146,7 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 	/*
 	 * set up enough so that it can read an inode
 	 */
-	sb->s_op = &ext2_sops;
+	sb->s_op = &ext2_sops; /* 赋值超级块操作 */
 	sb->s_export_op = &ext2_export_ops;
 	sb->s_xattr = ext2_xattr_handlers;
 
@@ -1156,7 +1156,7 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 	sb->s_quota_types = QTYPE_MASK_USR | QTYPE_MASK_GRP;
 #endif
 
-	root = ext2_iget(sb, EXT2_ROOT_INO);
+	root = ext2_iget(sb, EXT2_ROOT_INO); /* 读取根inode，ext2 根根inode号为2 */
 	if (IS_ERR(root)) {
 		ret = PTR_ERR(root);
 		goto failed_mount3;
@@ -1167,7 +1167,7 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 		goto failed_mount3;
 	}
 
-	sb->s_root = d_make_root(root);
+	sb->s_root = d_make_root(root); /* 创建根dentry  并建立根inode和根dentry关系 */
 	if (!sb->s_root) {
 		ext2_msg(sb, KERN_ERR, "error: get root inode failed");
 		ret = -ENOMEM;
@@ -1178,7 +1178,7 @@ static int ext2_fill_super(struct super_block *sb, void *data, int silent)
 			"warning: mounting ext3 filesystem as ext2");
 	if (ext2_setup_super (sb, es, sb_rdonly(sb)))
 		sb->s_flags |= SB_RDONLY;
-	ext2_write_super(sb);
+	ext2_write_super(sb); /* 同步超级块信息到磁盘 如挂载时间等 */
 	return 0;
 
 cantfind_ext2:
@@ -1649,3 +1649,11 @@ MODULE_DESCRIPTION("Second Extended Filesystem");
 MODULE_LICENSE("GPL");
 module_init(init_ext2_fs)
 module_exit(exit_ext2_fs)
+
+/* xt2_fill_super主要工作为：
+* 1.读取磁盘上的超级块；
+* 2.填充并关联vfs超级块；
+* 3.读取块组描述符；
+* 4.读取磁盘根inode并建立vfs 根inode;
+* 5.创建根dentry关联到根inode。
+*/

@@ -16,8 +16,8 @@ static __always_inline struct task_struct *get_current(void)
 {
 	unsigned long sp_el0;
 
-	asm ("mrs %0, sp_el0" : "=r" (sp_el0));
-
+	asm ("mrs %0, sp_el0" : "=r" (sp_el0)); /* 读取用户空间栈指针寄存器 sp_el0 的值，然后将此值强转成 task_struct 结构就可以获得当前进程。
+	                              （sp_el0 里存放的是 init_task，即 thread_info 地址，thread_info 又是在 task_sturct 的开始处，从而找到当前进程。） */
 	return (struct task_struct *)sp_el0;
 }
 
