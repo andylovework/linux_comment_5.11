@@ -95,8 +95,8 @@ extern int page_group_by_mobility_disabled;
 	get_pfnblock_flags_mask(page, page_to_pfn(page), MIGRATETYPE_MASK)
 
 struct free_area {
-	struct list_head	free_list[MIGRATE_TYPES];
-	unsigned long		nr_free;
+	struct list_head	free_list[MIGRATE_TYPES]; /* 空闲块双向链表 */
+	unsigned long		nr_free; /* 空闲块数目 */
 };
 
 static inline struct page *get_page_from_free_area(struct free_area *area,
@@ -796,14 +796,14 @@ typedef struct pglist_data {
 	 * zones may be populated, but it is the full list. It is referenced by
 	 * this node's node_zonelists as well as other node's node_zonelists.
 	 */
-	struct zone node_zones[MAX_NR_ZONES];
+	struct zone node_zones[MAX_NR_ZONES]; /* 存放该内存节点的内存区zones */
 
 	/*
 	 * node_zonelists contains references to all zones in all nodes.
 	 * Generally the first zones will be references to this node's
 	 * node_zones.
 	 */
-	struct zonelist node_zonelists[MAX_ZONELISTS];
+	struct zonelist node_zonelists[MAX_ZONELISTS]; /* zonelist装着系统中所有内存节点的zones */
 
 	int nr_zones; /* number of populated zones in this node */
 #ifdef CONFIG_FLATMEM	/* means !SPARSEMEM */

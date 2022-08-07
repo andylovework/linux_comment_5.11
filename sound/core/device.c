@@ -25,7 +25,7 @@
  * pointer address must be unique and unchanged.
  *
  * Return: Zero if successful, or a negative error code on failure.
- */
+ */ /* 创建组件 */
 int snd_device_new(struct snd_card *card, enum snd_device_type type,
 		   void *device_data, const struct snd_device_ops *ops)
 {

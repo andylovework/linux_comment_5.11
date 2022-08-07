@@ -130,12 +130,12 @@ void proc_task_name(struct seq_file *m, struct task_struct *p, bool escape)
 static const char * const task_state_array[] = {
 
 	/* states in TASK_REPORT: */
-	"R (running)",		/* 0x00 */
-	"S (sleeping)",		/* 0x01 */
-	"D (disk sleep)",	/* 0x02 */
-	"T (stopped)",		/* 0x04 */
-	"t (tracing stop)",	/* 0x08 */
-	"X (dead)",		/* 0x10 */
+	"R (running)",		/* 0x00 */ /* 运行状态 */
+	"S (sleeping)",		/* 0x01 */ /* 睡眠状态 */
+	"D (disk sleep)",	/* 0x02 */ /* 磁盘休眠状态 */
+	"T (stopped)",		/* 0x04 */ /* 停止状态 */
+	"t (tracing stop)",	/* 0x08 */ /* 停止状态 */
+	"X (dead)",		/* 0x10 */ /* 死亡状态 */
 	"Z (zombie)",		/* 0x20 */
 	"P (parked)",		/* 0x40 */
 

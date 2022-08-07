@@ -69,7 +69,7 @@ struct mem_cgroup;
 
 struct page {
 	unsigned long flags;		/* Atomic flags, some possibly
-					 * updated asynchronously */
+					 * updated asynchronously 这些状态包括页是不是脏的，是不是被锁定在内存中等。flag的每一位单独表示一种状态，所以它至少可以同时表示出32种不同的状态 */
 	/*
 	 * Five words (20/40 bytes) are available in this union.
 	 * WARNING: bit 0 of the first word is used for PageTail(). That

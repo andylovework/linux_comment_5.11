@@ -539,7 +539,7 @@ static __always_inline void *kmalloc_large(size_t size, gfp_t flags)
  * The recommended usage of the @flags is described at
  * :ref:`Documentation/core-api/memory-allocation.rst <memory_allocation>`
  *
- * Below is a brief outline of the most useful GFP flags
+ * Below is a brief outline of the most useful GFP flagsdo_
  *
  * %GFP_KERNEL
  *	Allocate normal kernel ram. May sleep.

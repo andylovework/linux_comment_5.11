@@ -168,7 +168,7 @@ static const struct file_operations misc_fops = {
  *
  *	A zero is returned on success and a negative errno code for
  *	failure.
- */
+ */ /* 注册混杂设备 */
 
 int misc_register(struct miscdevice *misc)
 {
@@ -234,7 +234,7 @@ EXPORT_SYMBOL(misc_register);
  *
  *	Unregister a miscellaneous device that was previously
  *	successfully registered with misc_register().
- */
+ */ /* 注销混杂设备 */
 
 void misc_deregister(struct miscdevice *misc)
 {

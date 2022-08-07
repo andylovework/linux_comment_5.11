@@ -212,7 +212,7 @@ void disk_uevent(struct gendisk *disk, enum kobject_action action);
 /* block/genhd.c */
 extern void device_add_disk(struct device *parent, struct gendisk *disk,
 			    const struct attribute_group **groups);
-static inline void add_disk(struct gendisk *disk)
+static inline void add_disk(struct gendisk *disk) /* 将该结构体实例注册到系统中 */
 {
 	device_add_disk(NULL, disk, NULL);
 }

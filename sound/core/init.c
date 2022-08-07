@@ -156,7 +156,7 @@ static void release_card_device(struct device *dev)
  *  in the given card_ret pointer.
  *
  *  Return: Zero if successful or a negative error code.
- */
+ */ /* 创建card */
 int snd_card_new(struct device *parent, int idx, const char *xid,
 		    struct module *module, int extra_size,
 		    struct snd_card **card_ret)
@@ -755,7 +755,7 @@ EXPORT_SYMBOL_GPL(snd_card_add_dev_attr);
  *  of the initialization of the card.
  *
  *  Return: Zero otherwise a negative error code if the registration failed.
- */
+ */ /* 注册声卡 */
 int snd_card_register(struct snd_card *card)
 {
 	int err;
