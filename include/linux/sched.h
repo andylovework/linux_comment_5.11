@@ -499,22 +499,22 @@ struct sched_entity {
 	struct sched_avg		avg;
 #endif
 };
-
+/* 表示实时调度实体 */
 struct sched_rt_entity {
-	struct list_head		run_list;
-	unsigned long			timeout;
-	unsigned long			watchdog_stamp;
-	unsigned int			time_slice;
+	struct list_head		run_list; /* 专门用于加入到优先级队列当中 */
+	unsigned long			timeout; /* 设置的时间超时 */
+	unsigned long			watchdog_stamp; /* 用于记录jiffies值 */
+	unsigned int			time_slice; /* 时间片 */
 	unsigned short			on_rq;
 	unsigned short			on_list;
 
-	struct sched_rt_entity		*back;
+	struct sched_rt_entity		*back; /* 临时用于从上往下连接RT调度实体使用 */
 #ifdef CONFIG_RT_GROUP_SCHED
-	struct sched_rt_entity		*parent;
+	struct sched_rt_entity		*parent; /* 指向父RT调度实体 */
 	/* rq on which this entity is (to be) queued: */
-	struct rt_rq			*rt_rq;
+	struct rt_rq			*rt_rq; /* RT调度实体所属的运行队列，被调度 */
 	/* rq "owned" by this entity/group: */
-	struct rt_rq			*my_q;
+	struct rt_rq			*my_q; /* RT调度实体所拥有的实时运行队列，用于管理子任务或子组任务 */
 #endif
 } __randomize_layout;
 
@@ -982,7 +982,7 @@ struct task_struct {
 	char				comm[TASK_COMM_LEN];
 
 	struct nameidata		*nameidata;
-
+// 用于Unix系统：信号量和共享内存
 #ifdef CONFIG_SYSVIPC
 	struct sysv_sem			sysvsem;
 	struct sysv_shm			sysvshm;
@@ -992,10 +992,10 @@ struct task_struct {
 	unsigned long			last_switch_time;
 #endif
 	/* Filesystem information: */
-	struct fs_struct		*fs; /* 文件系统信息 */
+	struct fs_struct		*fs; /* 文件系统信息,主要是进程的根目录和当前工作目录 */
 
 	/* Open file information: */
-	struct files_struct		*files; /* 打开文件信息 */
+	struct files_struct		*files; /* 打开文件夹信息 */
 
 #ifdef CONFIG_IO_URING
 	struct io_uring_task		*io_uring;

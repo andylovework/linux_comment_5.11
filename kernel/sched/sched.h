@@ -625,14 +625,14 @@ static inline int rt_bandwidth_enabled(void)
 
 /* Real-Time classes' related field in a runqueue: */
 struct rt_rq {
-	struct rt_prio_array	active;
-	unsigned int		rt_nr_running;
+	struct rt_prio_array	active; /* 优先级队列 */
+	unsigned int		rt_nr_running; /* 在RT运行队列当中所有活动的任务数 */
 	unsigned int		rr_nr_running;
 #if defined CONFIG_SMP || defined CONFIG_RT_GROUP_SCHED
 	struct {
-		int		curr; /* highest queued rt task prio */
+		int		curr; /* highest queued rt task prio 当前RT任务的最高优先级*/
 #ifdef CONFIG_SMP
-		int		next; /* next highest */
+		int		next; /* next highest 下一个要运行的RT任务的优先级，如果两个任务都有最高优先级，curr==next */
 #endif
 	} highest_prio;
 #endif

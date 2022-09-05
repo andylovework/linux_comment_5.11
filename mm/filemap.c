@@ -2460,13 +2460,13 @@ retry:
 	if (fatal_signal_pending(current))
 		return -EINTR;
 
-	filemap_get_read_batch(mapping, index, last_index, pvec);
+	filemap_get_read_batch(mapping, index, last_index, pvec); /* 第一次在页缓存中查找页 */
 	if (!pagevec_count(pvec)) {
 		if (iocb->ki_flags & IOCB_NOIO)
 			return -EAGAIN;
-		page_cache_sync_readahead(mapping, ra, filp, index,
+		page_cache_sync_readahead(mapping, ra, filp, index, /* 执行异步读取 */
 				last_index - index);
-		filemap_get_read_batch(mapping, index, last_index, pvec);
+		filemap_get_read_batch(mapping, index, last_index, pvec); /* 第二次在页缓存中查找页 */
 	}
 	if (!pagevec_count(pvec)) {
 		if (iocb->ki_flags & (IOCB_NOWAIT | IOCB_WAITQ))
@@ -2479,7 +2479,7 @@ retry:
 	}
 
 	page = pvec->pages[pagevec_count(pvec) - 1];
-	if (PageReadahead(page)) {
+	if (PageReadahead(page)) { /* 如果为页设置了预读标志 */
 		err = filemap_readahead(iocb, filp, mapping, page, last_index);
 		if (err)
 			goto err;
@@ -2576,7 +2576,7 @@ ssize_t filemap_read(struct kiocb *iocb, struct iov_iter *iter,
 		 */
 		if (iocb->ki_pos >> PAGE_SHIFT !=
 		    ra->prev_pos >> PAGE_SHIFT)
-			mark_page_accessed(pvec.pages[0]);
+			mark_page_accessed(pvec.pages[0]); /* 标记页被访问过 */
 
 		for (i = 0; i < pagevec_count(&pvec); i++) {
 			struct page *page = pvec.pages[i];

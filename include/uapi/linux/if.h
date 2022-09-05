@@ -194,12 +194,12 @@ enum {
 /* for compatibility with glibc net/if.h */
 #if __UAPI_DEF_IF_IFMAP
 struct ifmap {
-	unsigned long mem_start;
-	unsigned long mem_end;
-	unsigned short base_addr; 
-	unsigned char irq;
-	unsigned char dma;
-	unsigned char port;
+	unsigned long mem_start; /* 硬件读写缓冲区首地址 */
+	unsigned long mem_end; /* 硬件读写缓冲区尾地址 */
+	unsigned short base_addr; /* 本设备所使用的I/O端口地址 */
+	unsigned char irq; /* 本设备所使用的中断号 */
+	unsigned char dma; /* 本设备所使用的中断号 */
+	unsigned char port; /* 对应device结构中的if_port字段，使用在某些特殊情况使用 */
 	/* 3 bytes spare */
 };
 #endif /* __UAPI_DEF_IF_IFMAP */
@@ -239,15 +239,15 @@ struct ifreq {
 	} ifr_ifrn;
 	
 	union {
-		struct	sockaddr ifru_addr;
-		struct	sockaddr ifru_dstaddr;
-		struct	sockaddr ifru_broadaddr;
-		struct	sockaddr ifru_netmask;
-		struct  sockaddr ifru_hwaddr;
-		short	ifru_flags;
-		int	ifru_ivalue;
-		int	ifru_mtu;
-		struct  ifmap ifru_map;
+		struct	sockaddr ifru_addr; /* 设备Ip地址 */
+		struct	sockaddr ifru_dstaddr; /* 点对点连接中对端地址 */
+		struct	sockaddr ifru_broadaddr; /* 广播IP地址 */
+		struct	sockaddr ifru_netmask; /* 地址掩码 */
+		struct  sockaddr ifru_hwaddr; /* 设备对应的硬件地址 */
+		short	ifru_flags; /* 设备对应的标志字段值 */
+		int	ifru_ivalue; /* 代价值 */
+		int	ifru_mtu; /* 设备对应的最大传输单元 */
+		struct  ifmap ifru_map; /* 该结构用于设置/获取设备的基本信息 */
 		char	ifru_slave[IFNAMSIZ];	/* Just fits the size */
 		char	ifru_newname[IFNAMSIZ];
 		void __user *	ifru_data;
@@ -283,8 +283,8 @@ struct ifreq {
 
 /* for compatibility with glibc net/if.h */
 #if __UAPI_DEF_IF_IFCONF
-struct ifconf  {
-	int	ifc_len;			/* size of buffer	*/
+struct ifconf  { /* 用于数据获取 */
+	int	ifc_len;			/* size of buffer，缓冲区长度	*/
 	union {
 		char __user *ifcu_buf;
 		struct ifreq __user *ifcu_req;

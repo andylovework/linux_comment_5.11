@@ -478,35 +478,35 @@ static int alloc_fd(unsigned start, unsigned end, unsigned flags)
 repeat:
 	fdt = files_fdtable(files);
 	fd = start;
-	if (fd < files->next_fd)
+	if (fd < files->next_fd) /* 开始尝试分配文件描述符 */
 		fd = files->next_fd;
 
-	if (fd < fdt->max_fds)
+	if (fd < fdt->max_fds) /* 如果fd小于打开文件描述符表的大小，那么在打开文件描述符位图中查找一个空闲的文件描述符 */
 		fd = find_next_fd(fdt, fd);
 
 	/*
 	 * N.B. For clone tasks sharing a files structure, this test
 	 * will limit the total number of files that can be opened.
 	 */
-	error = -EMFILE;
+	error = -EMFILE; /* 如果进程打开的文件数量达到限制，那么返回-EMFILE */
 	if (fd >= end)
 		goto out;
 
-	error = expand_files(files, fd);
+	error = expand_files(files, fd); /* 如果当前的打开的文件表已经分配完文件描述符，那么扩大打开文件表 */
 	if (error < 0)
 		goto out;
 
 	/*
 	 * If we needed to expand the fs array we
 	 * might have blocked - try again.
-	 */
+	 *//* 如果打开的文件表被扩大了，那么重新尝试分配文件描述符 */
 	if (error)
 		goto repeat;
 
 	if (start <= files->next_fd)
-		files->next_fd = fd + 1;
+		files->next_fd = fd + 1; /* 记录下次分配文件描述开始尝试的位置 */
 
-	__set_open_fd(fd, fdt);
+	__set_open_fd(fd, fdt); /* 在文件描述符位图中记录fd已被分配 */
 	if (flags & O_CLOEXEC)
 		__set_close_on_exec(fd, fdt);
 	else

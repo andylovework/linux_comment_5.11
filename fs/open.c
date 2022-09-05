@@ -1189,25 +1189,25 @@ static long do_sys_openat2(int dfd, const char __user *filename,
 			   struct open_how *how)
 {
 	struct open_flags op;
-	int fd = build_open_flags(how, &op);
+	int fd = build_open_flags(how, &op); /* 把标志位分类为打开标志位、访问模式、意图和查找标志位，保存到结构体open_flags中 */
 	struct filename *tmp;
 
 	if (fd)
 		return fd;
 
-	tmp = getname(filename);
+	tmp = getname(filename); /* 把文件路径从用户空间的缓冲区复制都内核空间的缓冲区 */
 	if (IS_ERR(tmp))
 		return PTR_ERR(tmp);
 
-	fd = get_unused_fd_flags(how->flags);
+	fd = get_unused_fd_flags(how->flags); /* 分配文件描述符 */
 	if (fd >= 0) {
-		struct file *f = do_filp_open(dfd, tmp, &op);
+		struct file *f = do_filp_open(dfd, tmp, &op); /* 解析文件路径并得到文件的索引节点，创建文件的一个打开实例，把打开实例关联都索引节点 */
 		if (IS_ERR(f)) {
 			put_unused_fd(fd);
 			fd = PTR_ERR(f);
 		} else {
-			fsnotify_open(f);
-			fd_install(fd, f);
+			fsnotify_open(f); /* 通告打开文件事件，进程可以使用inotify监视文件系统的事件 */
+			fd_install(fd, f); /* 把打开文件的打开实例添加到进程的打开文件表中 */
 		}
 	}
 	putname(tmp);

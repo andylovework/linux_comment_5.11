@@ -1930,16 +1930,16 @@ enum netdev_ml_priv_type {
  */
 
 struct net_device {
-	char			name[IFNAMSIZ];
+	char			name[IFNAMSIZ]; /* 设备名，如果：eth%d */
 	struct netdev_name_node	*name_node;
-	struct dev_ifalias	__rcu *ifalias;
+	struct dev_ifalias	__rcu *ifalias; /* 网络设备的别名 */
 	/*
 	 *	I/O specific fields
 	 *	FIXME: Merge these and struct ifmap into one
 	 */
-	unsigned long		mem_end;
+	unsigned long		mem_end; /* 网络设备内存映射时在主机中的内存区域 */
 	unsigned long		mem_start;
-	unsigned long		base_addr;
+	unsigned long		base_addr; /* 网络设备I/O基地址 */
 
 	/*
 	 *	Some hardware also needs these fields (state,dev_list,
@@ -1947,11 +1947,11 @@ struct net_device {
 	 *	part of the usual set specified in Space.c.
 	 */
 
-	unsigned long		state;
+	unsigned long		state; /* 设备状态 */
 
-	struct list_head	dev_list;
-	struct list_head	napi_list;
-	struct list_head	unreg_list;
+	struct list_head	dev_list; /* 用于将每一个网络设备加入到一个网络命名空间中的网络设备双链表中 */
+	struct list_head	napi_list; /* 支持NAPI传输的网络设备链表 */
+	struct list_head	unreg_list; /* 被注销的网络设备链表  */
 	struct list_head	close_list;
 	struct list_head	ptype_all;
 	struct list_head	ptype_specific;
@@ -1962,19 +1962,19 @@ struct net_device {
 	} adj_list;
 
 	/* Read-mostly cache-line for fast-path access */
-	unsigned int		flags;
-	unsigned int		priv_flags;
+	unsigned int		flags; /* 网络设备接口的标识符,其状态类型被定义在<linux/if.h>之中 */
+	unsigned int		priv_flags; /* 网络设备接口的标识符，但对用户空间不可见 */
 	const struct net_device_ops *netdev_ops;
 	int			ifindex;
 	unsigned short		gflags;
-	unsigned short		hard_header_len;
+	unsigned short		hard_header_len; /* 设备头大小，单位：字节 */
 
 	/* Note : dev->mtu is often read without holding a lock.
 	 * Writers usually hold RTNL.
 	 * It is recommended to use READ_ONCE() to annotate the reads,
 	 * and to use WRITE_ONCE() to annotate the writes.
 	 */
-	unsigned int		mtu;
+	unsigned int		mtu; /* 最大传输单元 */
 	unsigned short		needed_headroom;
 	unsigned short		needed_tailroom;
 
@@ -1988,13 +1988,13 @@ struct net_device {
 
 	unsigned int		min_mtu;
 	unsigned int		max_mtu;
-	unsigned short		type;
+	unsigned short		type; /* 设备所属类型（如：Ethernet，Frame Relay等） */
 	unsigned char		min_header_len;
 	unsigned char		name_assign_type;
 
 	int			group;
 
-	struct net_device_stats	stats; /* not used by modern drivers */
+	struct net_device_stats	stats; /* not used by modern drivers 网络设备接口的统计情况*/
 
 	atomic_long_t		rx_dropped;
 	atomic_long_t		tx_dropped;
@@ -2029,8 +2029,8 @@ struct net_device {
 	unsigned char		operstate;
 	unsigned char		link_mode;
 
-	unsigned char		if_port;
-	unsigned char		dma;
+	unsigned char		if_port; /* 多端口设备，端口号 */
+	unsigned char		dma; /* 设备所使用的DMA通道号 */
 
 	/* Interface address info. */
 	unsigned char		perm_addr[MAX_ADDR_LEN];
@@ -2057,7 +2057,7 @@ struct net_device {
 #ifdef CONFIG_LOCKDEP
 	struct list_head	unlink_list;
 #endif
-	unsigned int		promiscuity;
+	unsigned int		promiscuity; /* 混杂模式计数器 */
 	unsigned int		allmulti;
 	bool			uc_promisc;
 #ifdef CONFIG_LOCKDEP
@@ -2159,7 +2159,7 @@ struct net_device {
 	refcount_t		dev_refcnt;
 #endif
 
-	struct list_head	link_watch_list;
+	struct list_head	link_watch_list; /* 链路查看机制链表 */
 
 	enum { NETREG_UNINITIALIZED=0,
 	       NETREG_REGISTERED,	/* completed register_netdevice */
@@ -2180,15 +2180,15 @@ struct net_device {
 	void (*priv_destructor)(struct net_device *dev);
 
 #ifdef CONFIG_NETPOLL
-	struct netpoll_info __rcu	*npinfo;
+	struct netpoll_info __rcu	*npinfo; /* NETPOLL相关信息 */
 #endif
 
-	possible_net_t			nd_net;
+	possible_net_t			nd_net; /* 网络命名空间 */
 
 	/* mid-layer private */
 	void				*ml_priv;
 	enum netdev_ml_priv_type	ml_priv_type;
-
+    /* 中间层的私有数据 */
 	union {
 		struct pcpu_lstats __percpu		*lstats;
 		struct pcpu_sw_netstats __percpu	*tstats;
@@ -2196,7 +2196,7 @@ struct net_device {
 	};
 
 #if IS_ENABLED(CONFIG_GARP)
-	struct garp_port __rcu	*garp_port;
+	struct garp_port __rcu	*garp_port; /* GARP协议相关 */
 #endif
 #if IS_ENABLED(CONFIG_MRP)
 	struct mrp_port __rcu	*mrp_port;
@@ -2210,7 +2210,7 @@ struct net_device {
 
 	/* for setting kernel sock attribute on TCP connection setup */
 #define GSO_MAX_SIZE		65536
-	unsigned int		gso_max_size;
+	unsigned int		gso_max_size; /* GSO最大值 */
 #define GSO_MAX_SEGS		65535
 	u16			gso_max_segs;
 

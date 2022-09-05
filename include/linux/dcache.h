@@ -94,7 +94,7 @@ struct dentry {
 	seqcount_spinlock_t d_seq;	/* per dentry seqlock */
 	struct hlist_bl_node d_hash;	/* lookup hash list */
 	struct dentry *d_parent;	/* parent directory父目录 */
-	struct qstr d_name;
+	struct qstr d_name; /* 储存文件名称， qstr是字符串的包装器，存储字符串地址、长度和散列值 */
 	struct inode *d_inode;		/* Where the name belongs to - NULL is
 					 * negative 与该目录项关联的inode */
 	unsigned char d_iname[DNAME_INLINE_LEN];	/* small names 短文件名 */

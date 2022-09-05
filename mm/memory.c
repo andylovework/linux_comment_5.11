@@ -339,7 +339,13 @@ static inline void free_p4d_range(struct mmu_gather *tlb, pgd_t *pgd,
 void free_pgd_range(struct mmu_gather *tlb,
 			unsigned long addr, unsigned long end,
 			unsigned long floor, unsigned long ceiling)
-{
+{/* n内核进程都有自己的pgd（page global directory），它是一个物理页 ，并且 包含一个pgd_t数组
+  *Linux内核32位/64位结构通用分页模型，一般模型使用四级分页机制PDG/PUD/PMD/PT。
+  *页全局目录包括很多个页中间目录的地址；
+  *页上级目录又依次包含很多个页中间目录的地址
+  *页中间目录双包含很多页表的地址
+  *页中间目录包含很多个页表的地址
+  *每个一页表项指向一个页框*/
 	pgd_t *pgd;
 	unsigned long next;
 

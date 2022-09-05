@@ -4198,7 +4198,7 @@ static void __init init_mount_tree(void)
 	if (IS_ERR(mnt))
 		panic("Can't create rootfs");
 
-	ns = alloc_mnt_ns(&init_user_ns, false);
+	ns = alloc_mnt_ns(&init_user_ns, false); /* 创建第一个挂载命名空间 */
 	if (IS_ERR(ns))
 		panic("Can't allocate initial namespace");
 	m = real_mount(mnt);
@@ -4206,15 +4206,15 @@ static void __init init_mount_tree(void)
 	ns->root = m;
 	ns->mounts = 1;
 	list_add(&m->mnt_list, &ns->list);
-	init_task.nsproxy->mnt_ns = ns;
+	init_task.nsproxy->mnt_ns = ns; /* 设置0号线程的挂载命名空间 */
 	get_mnt_ns(ns);
 
 	root.mnt = mnt;
 	root.dentry = mnt->mnt_root;
 	mnt->mnt_flags |= MNT_LOCKED;
 
-	set_fs_pwd(current->fs, &root);
-	set_fs_root(current->fs, &root);
+	set_fs_pwd(current->fs, &root); /* 把0号线程的当前工作目录设置为rootfs文件系统的根目录 */
+	set_fs_root(current->fs, &root); /* 把0号线程的根目录设置为rootfs文件系统的根目录 */
 }
 
 void __init mnt_init(void)

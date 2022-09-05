@@ -31,8 +31,8 @@ struct mnt_pcp {
 
 struct mountpoint {
 	struct hlist_node m_hash;
-	struct dentry *m_dentry;
-	struct hlist_head m_list;
+	struct dentry *m_dentry; /* 指向挂载点的目录 */
+	struct hlist_head m_list; /* 用来把同一个挂载点下的所有挂载描述符链表链接起来 */
 	int m_count;
 };
 

@@ -85,23 +85,23 @@
 
 struct iphdr {
 #if defined(__LITTLE_ENDIAN_BITFIELD)
-	__u8	ihl:4,
-		version:4;
+	__u8	ihl:4, /* 表示ineternet报头长度 */
+		version:4; /* 必须为4 */
 #elif defined (__BIG_ENDIAN_BITFIELD)
 	__u8	version:4,
   		ihl:4;
 #else
 #error	"Please fix <asm/byteorder.h>"
 #endif
-	__u8	tos;
-	__be16	tot_len;
-	__be16	id;
+	__u8	tos; /* 服务类型字段（8位）：服务类型（TOS）字段包括一个3bit的优先权字段（已被忽略），4bit的TOS子字段和1bit未用位但必须置0。4bit的TOS子字段分别表示最小时延、最大吞吐量、最高可靠性和最小费用。4bit中只能设置1bit。如果4bit均为0表示这是一般服务 */
+	__be16	tot_len; /* 总长度字段（16）位指的是整个IP数据包的长度，以字节位单位。利用首部长度字段和总长度字段，就可以知道IP数据报中数据内容的起始位置和长度。由于该字段长1bit，所以IP数据包最长可长达65535字节 */
+	__be16	id; /* I标识字段（16bit）唯一地标识主机发送地每一份数据报，通常每发送一份报文他的值就加1 */
 	__be16	frag_off;
-	__u8	ttl;
-	__u8	protocol;
-	__sum16	check;
-	__be32	saddr;
-	__be32	daddr;
+	__u8	ttl; /* TTL（Time to live）8位，生存时间字段设置了数据报可以经过的最多路由器数。它指定了数据报的生存时间 */
+	__u8	protocol; /* 协议字段（8位）：根据它可以识别是哪个协议向IP传送数据 */
+	__sum16	check; /* 首部校验和字段（16）位时根据IP首部计算的校验和码。他不对首部后面的数据进行计算。ICMP、IGMP、UDP、TCP在它们各自的首部中均含有同时覆盖首部和数据校验和码 */
+	__be32	saddr; /* 32源IP地址 */
+	__be32	daddr; /* iphdr->daddr */
 	/*The options start here. */
 };
 

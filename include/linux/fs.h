@@ -629,7 +629,7 @@ struct inode {
 #endif
 
 	/* Stat data, not accessed from path walking */
-	unsigned long		i_ino;  /* 索引节点号 */
+	unsigned long		i_ino;  /* 索引节点号的引用计数*/
 	/*
 	 * Filesystems may only read i_nlink directly.  They shall use the
 	 * following functions for modification:
@@ -916,15 +916,15 @@ static inline int ra_has_index(struct file_ra_state *ra, pgoff_t index)
 	return (index >= ra->start &&
 		index <  ra->start + ra->size);
 }
-
+/* VFS当中的file数据结构如下 */
 struct file {
 	union {
 		struct llist_node	fu_llist;
 		struct rcu_head 	fu_rcuhead;
 	} f_u;
-	struct path		f_path;
-	struct inode		*f_inode;	/* cached value */
-	const struct file_operations	*f_op;
+	struct path		f_path; /* 存储文件在目录树中的位置 */
+	struct inode		*f_inode;	/* cached value 指向文件索引节点 */
+	const struct file_operations	*f_op; /* 指向文件操作集合 */
 
 	/*
 	 * Protects f_ep, f_flags.
@@ -932,11 +932,11 @@ struct file {
 	 */
 	spinlock_t		f_lock;
 	enum rw_hint		f_write_hint;
-	atomic_long_t		f_count;
+	atomic_long_t		f_count; /* file结构体的引用计数 */
 	unsigned int 		f_flags;
-	fmode_t			f_mode;
+	fmode_t			f_mode; /* 访问模式 */
 	struct mutex		f_pos_lock;
-	loff_t			f_pos;
+	loff_t			f_pos; /* 文件偏移，进程当前正在访问的位置 */
 	struct fown_struct	f_owner;
 	const struct cred	*f_cred;
 	struct file_ra_state	f_ra;
@@ -952,7 +952,7 @@ struct file {
 	/* Used by fs/eventpoll.c to link all the hooks to this file */
 	struct hlist_head	*f_ep;
 #endif /* #ifdef CONFIG_EPOLL */
-	struct address_space	*f_mapping;
+	struct address_space	*f_mapping; /* 文件的地址空间 */
 	errseq_t		f_wb_err;
 	errseq_t		f_sb_err; /* for syncfs */
 } __randomize_layout
@@ -1454,7 +1454,7 @@ struct super_block {
 	struct block_device	*s_bdev; /* 对应的块设备 */
 	struct backing_dev_info *s_bdi; /* 超级块对应的BDI设备 */
 	struct mtd_info		*s_mtd; /*指向MTD设备信息结构*/ 
-	struct hlist_node	s_instances; /*文件系统的超级块实例的链表*/ 
+	struct hlist_node	s_instances; /*文件系统的超级块实例的链表,同一文件系统类型的所有超级块实例连接在一起，链表节点是结构体file_system_type*/ 
 	unsigned int		s_quota_types;	/* Bitmask of supported quota types */
 	struct quota_info	s_dquot;	/* Diskquota specific options磁盘限额相关选项 */
 
@@ -2469,11 +2469,11 @@ struct file_system_type {
 	int (*init_fs_context)(struct fs_context *);
 	const struct fs_parameter_spec *parameters;
 	struct dentry *(*mount) (struct file_system_type *, int,
-		       const char *, void *); /* 对应的mount函数 */
-	void (*kill_sb) (struct super_block *);
+		       const char *, void *); /* 用来挂载文件系统的时候读取并且解析超级块 */
+	void (*kill_sb) (struct super_block *); /* 用来卸载文件系统的时候释放超级块 */
 	struct module *owner;
 	struct file_system_type * next; /* 通过该变量将系统上所有文件系统类型链接到一起 */
-	struct hlist_head fs_supers; /* 该文件系统类型锁包含的超级块对象 */
+	struct hlist_head fs_supers; /* 多个存储设备上的文件系统的类型可能相同，用来把相同文件系统类型的超级块链接起来 */
 
 	struct lock_class_key s_lock_key;
 	struct lock_class_key s_umount_key;

@@ -1525,11 +1525,11 @@ static struct dentry *lookup_dcache(const struct qstr *name,
  * dentries - as the matter of fact, this only gets called
  * when directory is guaranteed to have no in-lookup children
  * at all.
- */
+ */ /* 根据父目录位置，创建硬链接文件的目录项 */
 static struct dentry *__lookup_hash(const struct qstr *name,
 		struct dentry *base, unsigned int flags)
 {
-	struct dentry *dentry = lookup_dcache(name, base, flags);
+	struct dentry *dentry = lookup_dcache(name, base, flags); /* 创建常规文件的目录项目 */
 	struct dentry *old;
 	struct inode *dir = base->d_inode;
 
@@ -3146,7 +3146,7 @@ static struct dentry *lookup_open(struct nameidata *nd, struct file *file,
 		return ERR_PTR(-ENOENT);
 
 	file->f_mode &= ~FMODE_CREATED;
-	dentry = d_lookup(dir, &nd->last);
+	dentry = d_lookup(dir, &nd->last); /* 在内存的目录项缓存中查找 */
 	for (;;) {
 		if (!dentry) {
 			dentry = d_alloc_parallel(dir, &nd->last, &wq);
@@ -3202,8 +3202,8 @@ static struct dentry *lookup_open(struct nameidata *nd, struct file *file,
 		return dentry;
 	}
 
-	if (d_in_lookup(dentry)) {
-		struct dentry *res = dir_inode->i_op->lookup(dir_inode, dentry,
+	if (d_in_lookup(dentry)) {/* 如果没找到，调用dir_inoddir_inode->i_op->lookup进行查找 */
+		struct dentry *res = dir_inoddir_inode->i_op->lookup(dir_inode, dentry,
 							     nd->flags);
 		d_lookup_done(dentry);
 		if (unlikely(res)) {
@@ -3257,14 +3257,14 @@ static const char *open_last_lookups(struct nameidata *nd,
 	if (nd->last_type != LAST_NORM) {
 		if (nd->depth)
 			put_link(nd);
-		return handle_dots(nd, nd->last_type);
+		return handle_dots(nd, nd->last_type); /* 处理.. */
 	}
 
 	if (!(open_flag & O_CREAT)) {
 		if (nd->last.name[nd->last.len])
 			nd->flags |= LOOKUP_FOLLOW | LOOKUP_DIRECTORY;
 		/* we _can_ be in RCU mode here */
-		dentry = lookup_fast(nd, &inode, &seq);
+		dentry = lookup_fast(nd, &inode, &seq); /* 获取到最后一级分量的dentry */
 		if (IS_ERR(dentry))
 			return ERR_CAST(dentry);
 		if (likely(dentry))
@@ -3282,7 +3282,7 @@ static const char *open_last_lookups(struct nameidata *nd,
 		if (unlikely(nd->last.name[nd->last.len]))
 			return ERR_PTR(-EISDIR);
 	}
-
+    /* 处理新建文件情况 */
 	if (open_flag & (O_CREAT | O_TRUNC | O_WRONLY | O_RDWR)) {
 		got_write = !mnt_want_write(nd->path.mnt);
 		/*
@@ -3295,7 +3295,7 @@ static const char *open_last_lookups(struct nameidata *nd,
 		inode_lock(dir->d_inode);
 	else
 		inode_lock_shared(dir->d_inode);
-	dentry = lookup_open(nd, file, op, got_write);
+	dentry = lookup_open(nd, file, op, got_write); /* 调用vfs_create()创建常规文件的inode节点 */
 	if (!IS_ERR(dentry) && (file->f_mode & FMODE_CREATED))
 		fsnotify_create(dir->d_inode, dentry);
 	if (open_flag & O_CREAT)
@@ -3304,7 +3304,7 @@ static const char *open_last_lookups(struct nameidata *nd,
 		inode_unlock_shared(dir->d_inode);
 
 	if (got_write)
-		mnt_drop_write(nd->path.mnt);
+		mnt_drop_write(nd->path.mnt); /* 放弃对文件系统的访问权限 */
 
 	if (IS_ERR(dentry))
 		return ERR_CAST(dentry);
@@ -3318,7 +3318,7 @@ static const char *open_last_lookups(struct nameidata *nd,
 finish_lookup:
 	if (nd->depth)
 		put_link(nd);
-	res = step_into(nd, WALK_TRAILING, dentry, inode, seq);
+	res = step_into(nd, WALK_TRAILING, dentry, inode, seq); /* 处理符号链接 */
 	if (unlikely(res))
 		nd->flags &= ~(LOOKUP_OPEN|LOOKUP_CREATE|LOOKUP_EXCL);
 	return res;
@@ -3500,8 +3500,8 @@ static struct file *path_openat(struct nameidata *nd,
 		error = do_o_path(nd, flags, file);
 	} else {
 		const char *s = path_init(nd, flags);
-		while (!(error = link_path_walk(s, nd)) &&
-		       (s = open_last_lookups(nd, file, op)) != NULL)
+		while (!(error = link_path_walk(s, nd)) && /* 解析文件每一个分量，最后一个分量除外 */
+		       (s = open_last_lookups(nd, file, op)) != NULL) /* 解析文件最后一个分量，并打开文件 */
 			;
 		if (!error)
 			error = do_open(nd, file, op);
@@ -3533,8 +3533,8 @@ struct file *do_filp_open(int dfd, struct filename *pathname,
 	set_nameidata(&nd, dfd, pathname, NULL);
 	filp = path_openat(&nd, op, flags | LOOKUP_RCU);
 	if (unlikely(filp == ERR_PTR(-ECHILD)))
-		filp = path_openat(&nd, op, flags);
-	if (unlikely(filp == ERR_PTR(-ESTALE)))
+		filp = path_openat(&nd, op, flags);	
+	if (unlikely(filp == ERR_PTR(-ESTALE))) /* 负责解析文件路径 */
 		filp = path_openat(&nd, op, flags | LOOKUP_REVAL);
 	restore_nameidata();
 	return filp;
@@ -3676,7 +3676,7 @@ EXPORT_SYMBOL(user_path_create);
  * care to map the inode according to @mnt_userns before checking permissions.
  * On non-idmapped mounts or if permission checking is to be performed on the
  * raw inode simply passs init_user_ns.
- */
+ */ /* 创建特殊文件的inode节点，初始化inode的i_rdev成员，并且将i_fop成员指向默认文件操作 */
 int vfs_mknod(struct user_namespace *mnt_userns, struct inode *dir,
 	      struct dentry *dentry, umode_t mode, dev_t dev)
 {

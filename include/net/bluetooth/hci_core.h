@@ -307,7 +307,7 @@ struct hci_dev {
 	struct mutex	lock;
 
 	char		name[8];
-	unsigned long	flags;
+	unsigned long	flags; /* 设置状态 */
 	__u16		id;
 	__u8		bus;
 	__u8		dev_type;
