@@ -234,15 +234,15 @@ struct mtd_master {
 };
 
 struct mtd_info {
-	u_char type;
-	uint32_t flags;
-	uint64_t size;	 // Total size of the MTD
+	u_char type; /* 内存技术类型，例如MTD_RAM,MTD_ROM,MTD_NORFLASH,MTD_NAND_FLASH等 */
+	uint32_t flags; /* 标志位,MTD设备的性能描述 */
+	uint64_t size; /* Total size of the MTD, MTD设备的大小 */
 
 	/* "Major" erase size for the device. Naïve users may take this
 	 * to be the only erase size available, or may use the more detailed
 	 * information below if they desire
 	 */
-	uint32_t erasesize;
+	uint32_t erasesize; /* MTD设备的擦除单元大小，对于NandFlash来说就是Block的大小 */
 	/* Minimal writable flash unit size. In case of NOR flash it is 1 (even
 	 * though individual bits can be cleared), in case of NAND flash it is
 	 * one NAND page (or half, or one-fourths of it), in case of ECC-ed NOR
@@ -250,7 +250,7 @@ struct mtd_info {
 	 * Any driver registering a struct mtd_info must ensure a writesize of
 	 * 1 or larger.
 	 */
-	uint32_t writesize;
+	uint32_t writesize; /* 写大小, 对于norFlash是字节,对nandFlash为一页  */
 
 	/*
 	 * Size of the write buffer used by the MTD. MTD devices having a write
@@ -263,8 +263,8 @@ struct mtd_info {
 	 */
 	uint32_t writebufsize;
 
-	uint32_t oobsize;   // Amount of OOB data per block (e.g. 16)
-	uint32_t oobavail;  // Available OOB bytes per block
+	uint32_t oobsize;   /* Amount of OOB data per block (e.g. 16), oob(Out of band)块大小 */
+	uint32_t oobavail;  /* Available OOB bytes per block */
 
 	/*
 	 * If erasesize is a power of 2 then the shift is stored in
@@ -304,17 +304,17 @@ struct mtd_info {
 	/* Data for variable erase regions. If numeraseregions is zero,
 	 * it means that the whole device has erasesize as given above.
 	 */
-	int numeraseregions;
+	int numeraseregions; /* 擦除区域个数，通常为1 */
 	struct mtd_erase_region_info *eraseregions;
 
 	/*
 	 * Do not call via these pointers, use corresponding mtd_*()
 	 * wrappers instead.
 	 */
-	int (*_erase) (struct mtd_info *mtd, struct erase_info *instr);
-	int (*_point) (struct mtd_info *mtd, loff_t from, size_t len,
+	int (*_erase) (struct mtd_info *mtd, struct erase_info *instr); /* 将一个erase_info加入擦除队列 */
+	int (*_point) (struct mtd_info *mtd, loff_t from, size_t len, /* 允许片内执行（XIP）*/
 		       size_t *retlen, void **virt, resource_size_t *phys);
-	int (*_unpoint) (struct mtd_info *mtd, loff_t from, size_t len);
+	int (*_unpoint) (struct mtd_info *mtd, loff_t from, size_t len); /* 与point函数相反，是禁止片内执行（XIP） */
 	int (*_read) (struct mtd_info *mtd, loff_t from, size_t len,
 		      size_t *retlen, u_char *buf);
 	int (*_write) (struct mtd_info *mtd, loff_t to, size_t len,
@@ -341,17 +341,17 @@ struct mtd_info {
 	int (*_erase_user_prot_reg) (struct mtd_info *mtd, loff_t from,
 				     size_t len);
 	int (*_writev) (struct mtd_info *mtd, const struct kvec *vecs,
-			unsigned long count, loff_t to, size_t *retlen);
-	void (*_sync) (struct mtd_info *mtd);
-	int (*_lock) (struct mtd_info *mtd, loff_t ofs, uint64_t len);
+			unsigned long count, loff_t to, size_t *retlen); /* 基于kevc的读写方法 */
+	void (*_sync) (struct mtd_info *mtd); /* MTD设备的同步函数 */
+	int (*_lock) (struct mtd_info *mtd, loff_t ofs, uint64_t len); /* 芯片的加锁和解锁 */
 	int (*_unlock) (struct mtd_info *mtd, loff_t ofs, uint64_t len);
 	int (*_is_locked) (struct mtd_info *mtd, loff_t ofs, uint64_t len);
 	int (*_block_isreserved) (struct mtd_info *mtd, loff_t ofs);
 	int (*_block_isbad) (struct mtd_info *mtd, loff_t ofs);
-	int (*_block_markbad) (struct mtd_info *mtd, loff_t ofs);
+	int (*_block_markbad) (struct mtd_info *mtd, loff_t ofs); /* 坏块管理函数 */
 	int (*_max_bad_blocks) (struct mtd_info *mtd, loff_t ofs, size_t len);
 	int (*_suspend) (struct mtd_info *mtd);
-	void (*_resume) (struct mtd_info *mtd);
+	void (*_resume) (struct mtd_info *mtd); /* 支持电源管理函数 */
 	void (*_reboot) (struct mtd_info *mtd);
 	/*
 	 * If the driver is something smart, like UBI, it may need to maintain
@@ -373,7 +373,7 @@ struct mtd_info {
 	/* Subpage shift (NAND) */
 	int subpage_sft;
 
-	void *priv;
+	void *priv; /* 私有数据指针,这个指针指向MTD驱动中另一个重要的数据结构struct nand_chip */
 
 	struct module *owner;
 	struct device dev;

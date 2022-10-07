@@ -36,10 +36,10 @@ typedef unsigned long kernel_ulong_t;
  *			instead of using it as a pointer.
  */
 struct pci_device_id {
-	__u32 vendor, device;		/* Vendor and device ID or PCI_ANY_ID*/
-	__u32 subvendor, subdevice;	/* Subsystem ID's or PCI_ANY_ID */
-	__u32 class, class_mask;	/* (class,subclass,prog-if) triplet */
-	kernel_ulong_t driver_data;	/* Data private to the driver */
+	__u32 vendor, device;		/* Vendor and device ID or PCI_ANY_ID*,厂商ID、设备ID/
+	__u32 subvendor, subdevice;	/* Subsystem ID's or PCI_ANY_ID  指定设备的PCI系统厂商和子系统设备ID */
+	__u32 class, class_mask;	/* (class,subclass,prog-if) triplet， 使驱动程序可以指定某一种PCI类设备 */
+	kernel_ulong_t driver_data;	/* Data private to the driver， 保存与具体设备相关的私有信息 */
 };
 
 

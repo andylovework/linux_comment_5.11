@@ -116,17 +116,17 @@ typedef irqreturn_t (*irq_handler_t)(int, void *);
  */
 struct irqaction {
 	irq_handler_t		handler; /* 设备中断处理函数 */
-	void			*dev_id;
+	void			    *dev_id; /* 设备 ID */
 	void __percpu		*percpu_dev_id;
-	struct irqaction	*next;
+	struct irqaction	*next; /* 指向链表中的下一个 irqaction 结构体 */
 	irq_handler_t		thread_fn; /* 中断后处理线程 */
 	struct task_struct	*thread;
 	struct irqaction	*secondary;
-	unsigned int		irq;
+	unsigned int		irq; /* 中断通道号 */
 	unsigned int		flags;
 	unsigned long		thread_flags;
 	unsigned long		thread_mask;
-	const char		*name;
+	const char		    *name; /* 中断处理程序名称，显示在 /proc/interrupts 中 */
 	struct proc_dir_entry	*dir; /* proc路径 */
 } ____cacheline_internodealigned_in_smp;
 

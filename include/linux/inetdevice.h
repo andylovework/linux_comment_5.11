@@ -23,10 +23,10 @@ struct ipv4_devconf {
 #define MC_HASH_SZ_LOG 9
 
 struct in_device {
-	struct net_device	*dev;
-	refcount_t		refcnt;
+	struct net_device	*dev; /* 指向所属网络设备 */
+	refcount_t		refcnt; /* 引用计算器 */
 	int			dead;
-	struct in_ifaddr	__rcu *ifa_list;/* IP ifaddr chain		*/
+	struct in_ifaddr	__rcu *ifa_list;/* IP ifaddr chain */
 
 	struct ip_mc_list __rcu	*mc_list;	/* IP multicast filter chain    */
 	struct ip_mc_list __rcu	* __rcu *mc_hash;
@@ -45,9 +45,9 @@ struct in_device {
 	struct timer_list	mr_gq_timer;	/* general query timer */
 	struct timer_list	mr_ifc_timer;	/* interface change timer */
 
-	struct neigh_parms	*arp_parms;
-	struct ipv4_devconf	cnf;
-	struct rcu_head		rcu_head;
+	struct neigh_parms	*arp_parms; /* 指向neight_parms结构体示例，存储一些与ARP有关的参数 */
+	struct ipv4_devconf	cnf; /* 一些针对网络设备接口的IPv4设置 */
+	struct rcu_head		rcu_head; /* 运用RCU机制释放所在的IP配置块 */
 };
 
 #define IPV4_DEVCONF(cnf, attr) ((cnf).data[IPV4_DEVCONF_ ## attr - 1])
@@ -136,18 +136,18 @@ static inline void ipv4_devconf_setall(struct in_device *in_dev)
 
 struct in_ifaddr {
 	struct hlist_node	hash;
-	struct in_ifaddr	__rcu *ifa_next;
-	struct in_device	*ifa_dev;
-	struct rcu_head		rcu_head;
+	struct in_ifaddr	__rcu *ifa_next; /* 一个网络设备的多个ip地址块用ifa_next */
+	struct in_device	*ifa_dev; /* 指向所属的IP配置块 */
+	struct rcu_head		rcu_head; /* 主要运用RCU机制来释放对应的IP地址块 */
 	__be32			ifa_local;
-	__be32			ifa_address;
-	__be32			ifa_mask;
+	__be32			ifa_address; /* 用来存储IP地址的，但在不同设备接口特性下意义不同 */
+	__be32			ifa_mask; /* IP地址的子网掩码 */
 	__u32			ifa_rt_priority;
-	__be32			ifa_broadcast;
-	unsigned char		ifa_scope;
+	__be32			ifa_broadcast; /* 网络设备的广播地址 */
+	unsigned char		ifa_scope; /* 寻址范围 */
 	unsigned char		ifa_prefixlen;
-	__u32			ifa_flags;
-	char			ifa_label[IFNAMSIZ];
+	__u32			ifa_flags; /* IP地址属性 */
+	char			ifa_label[IFNAMSIZ]; /* 地址标签，通常是网络设备名或网络设备别名 */
 
 	/* In seconds, relative to tstamp. Expiry is at tstamp + HZ * lft. */
 	__u32			ifa_valid_lft;

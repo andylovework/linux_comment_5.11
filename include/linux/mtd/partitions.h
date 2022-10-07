@@ -44,11 +44,11 @@
  */
 
 struct mtd_partition {
-	const char *name;		/* identifier string */
+	const char *name;		/* identifier string，分区名 */
 	const char *const *types;	/* names of parsers to use if any */
-	uint64_t size;			/* partition size */
-	uint64_t offset;		/* offset within the master MTD space */
-	uint32_t mask_flags;		/* master MTD flags to mask out for this partition */
+	uint64_t size;			/* partition size，分区大小 */
+	uint64_t offset;		/* offset within the master MTD space，分区所在的偏移值 */
+	uint32_t mask_flags;		/* master MTD flags to mask out for this partition，掩码标志 */
 	uint32_t add_flags;		/* flags to add to the partition */
 	struct device_node *of_node;
 };

@@ -1023,9 +1023,9 @@ static int s3c24xx_nand_probe_dt(struct platform_device *pdev)
 {
 	const struct s3c24XX_nand_devtype_data *devtype_data;
 	struct s3c2410_platform_nand *pdata;
-	struct s3c2410_nand_info *info = platform_get_drvdata(pdev);
+	struct s3c2410_nand_info *info = platform_get_drvdata(pdev); /* s3c2410 nand flash状态结构体 包括 nand 时钟 nand控制器等 */
 	struct device_node *np = pdev->dev.of_node, *child;
-	struct s3c2410_nand_set *sets;
+	struct s3c2410_nand_set *sets; /* 不同的mtd注册的nand 芯片 */
 
 	devtype_data = of_device_get_match_data(&pdev->dev);
 	if (!devtype_data)
