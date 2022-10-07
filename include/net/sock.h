@@ -183,9 +183,9 @@ struct sock_common {
 		};
 	};
 
-	unsigned short		skc_family;
-	volatile unsigned char	skc_state;
-	unsigned char		skc_reuse:4;
+	unsigned short		skc_family; /* 所属协议族 */
+	volatile unsigned char	skc_state; /* 等同于TCP的状态 */
+	unsigned char		skc_reuse:4; /* 标识是否可以重用地址和端口 */
 	unsigned char		skc_reuseport:1;
 	unsigned char		skc_ipv6only:1;
 	unsigned char		skc_net_refcnt:1;

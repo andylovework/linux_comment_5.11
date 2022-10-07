@@ -249,9 +249,9 @@ struct ifreq {
 		int	ifru_mtu; /* 设备对应的最大传输单元 */
 		struct  ifmap ifru_map; /* 该结构用于设置/获取设备的基本信息 */
 		char	ifru_slave[IFNAMSIZ];	/* Just fits the size */
-		char	ifru_newname[IFNAMSIZ];
-		void __user *	ifru_data;
-		struct	if_settings ifru_settings;
+		char	ifru_newname[IFNAMSIZ]; /* 用于设置网络设备新的名称 */
+		void __user *	ifru_data; /* 在执行SIOCETHTOOL命令，根据不同的子命令对应不同的结构 */
+		struct	if_settings ifru_settings;/* 用来设置相关设备及协议 */
 	} ifr_ifru;
 };
 #endif /* __UAPI_DEF_IF_IFREQ */

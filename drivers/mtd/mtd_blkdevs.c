@@ -384,10 +384,10 @@ int add_mtd_blktrans_dev(struct mtd_blktrans_dev *new)
 	new->disk = gd;
 	new->rq = new->disk->queue;
 	gd->private_data = new;
-	gd->major = tr->major;
-	gd->first_minor = (new->devnum) << tr->part_bits;
+	gd->major = tr->major; /* 设置gendisk的主设备号 */
+	gd->first_minor = (new->devnum) << tr->part_bits; /* 设置gendisk的起始此设备号 */
 	gd->minors = 1 << tr->part_bits;
-	gd->fops = &mtd_block_ops;
+	gd->fops = &mtd_block_ops; /* 设置操作函数 */
 
 	if (tr->part_bits)
 		if (new->devnum < 26)

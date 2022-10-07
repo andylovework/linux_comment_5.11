@@ -1939,7 +1939,7 @@ struct net_device {
 	 */
 	unsigned long		mem_end; /* 网络设备内存映射时在主机中的内存区域 */
 	unsigned long		mem_start;
-	unsigned long		base_addr; /* 网络设备I/O基地址 */
+	unsigned long		base_addr; /* 网络设备I/O基地址, 在设备探测时被初始化，ifconfig命令可显示和修改当前值 */
 
 	/*
 	 *	Some hardware also needs these fields (state,dev_list,
@@ -2045,7 +2045,7 @@ struct net_device {
 	unsigned short		padded;
 
 	spinlock_t		addr_list_lock;
-	int			irq;
+	int	irq; /* 分配给设备的中断号，一般在初始化设备时被初始化 */
 
 	struct netdev_hw_addr_list	uc;
 	struct netdev_hw_addr_list	mc;
@@ -2961,7 +2961,7 @@ static inline int dev_direct_xmit(struct sk_buff *skb, u16 queue_id)
 	return ret;
 }
 
-int register_netdevice(struct net_device *dev);
+int register_netdevice(struct net_device *dev); /* 设备注册 */
 void unregister_netdevice_queue(struct net_device *dev, struct list_head *head);
 void unregister_netdevice_many(struct list_head *head);
 static inline void unregister_netdevice(struct net_device *dev)

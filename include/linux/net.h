@@ -112,17 +112,17 @@ struct socket_wq {
  *  @wq: wait queue for several uses
  */
 struct socket {
-	socket_state		state;
+	socket_state state; /* 用于表示所在套接口所处的状态的标志 */
 
-	short			type;
+	short type; /* socket的类型 */
 
-	unsigned long		flags;
+	unsigned long flags;
 
-	struct file		*file;
-	struct sock		*sk;
-	const struct proto_ops	*ops;
+	struct file *file; /* 应用层下的表示形式 */
+	struct sock	 *sk; /* 连接层的一个抽象 */
+	const struct proto_ops *ops; /* socket操作函数集合 */
 
-	struct socket_wq	wq;
+	struct socket_wq wq;
 };
 
 struct vm_area_struct;

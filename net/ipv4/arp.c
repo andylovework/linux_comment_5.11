@@ -328,7 +328,7 @@ void arp_send(int type, int ptype, __be32 dest_ip,
 		     target_hw, NULL);
 }
 EXPORT_SYMBOL(arp_send);
-
+/* 用来发送arp请求 */
 static void arp_solicit(struct neighbour *neigh, struct sk_buff *skb)
 {
 	__be32 saddr = 0;
@@ -341,7 +341,7 @@ static void arp_solicit(struct neighbour *neigh, struct sk_buff *skb)
 
 	rcu_read_lock();
 	in_dev = __in_dev_get_rcu(dev);
-	if (!in_dev) {
+	if (!in_dev) { /* 检测邻居项网络设备IP配置块是否有效 */
 		rcu_read_unlock();
 		return;
 	}
@@ -369,9 +369,9 @@ static void arp_solicit(struct neighbour *neigh, struct sk_buff *skb)
 	}
 	rcu_read_unlock();
 
-	if (!saddr)
+	if (!saddr) /* 根据arp_announce选择源IP地址 */
 		saddr = inet_select_addr(dev, target, RT_SCOPE_LINK);
-
+    /* 检测ARP请求报文重传次数是否达到上限，如果是，则停止发送 */
 	probes -= NEIGH_VAR(neigh->parms, UCAST_PROBES);
 	if (probes < 0) {
 		if (!(neigh->nud_state & NUD_VALID))
@@ -388,10 +388,10 @@ static void arp_solicit(struct neighbour *neigh, struct sk_buff *skb)
 
 	if (skb && !(dev->priv_flags & IFF_XMIT_DST_RELEASE))
 		dst = skb_dst(skb);
-	arp_send_dst(ARPOP_REQUEST, ETH_P_ARP, target, dev, saddr,
-		     dst_hw, dev->dev_addr, NULL, dst);
+	/* 将得到的硬件源、目标地址和IP源、目标地址等作为参数，调用arp_send()创建一个arp报文并将其输出 */
+	arp_send_dst(ARPOP_REQUEST, ETH_P_ARP, target, dev, saddr, dst_hw, dev->dev_addr, NULL, dst);
 }
-
+/* 根据过滤规则对输入ARP报文中源、目标IP地址进行确认，返回值非0表示需要过滤 */
 static int arp_ignore(struct in_device *in_dev, __be32 sip, __be32 tip)
 {
 	struct net *net = dev_net(in_dev->dev);
@@ -1294,14 +1294,14 @@ static int arp_proc_init(void);
 
 void __init arp_init(void)
 {
-	neigh_table_init(NEIGH_ARP_TABLE, &arp_tbl);
+	neigh_table_init(NEIGH_ARP_TABLE, &arp_tbl); /* 初始化arp协议邻居表 */
 
 	dev_add_pack(&arp_packet_type);
 	arp_proc_init();
 #ifdef CONFIG_SYSCTL
-	neigh_sysctl_register(NULL, &arp_tbl.parms, NULL);
+	neigh_sysctl_register(NULL, &arp_tbl.parms, NULL); /* 在协议栈中注册arp协议 */
 #endif
-	register_netdevice_notifier(&arp_netdev_notifier);
+	register_netdevice_notifier(&arp_netdev_notifier); /* 建立proc对象，注册事件通知 */
 }
 
 #ifdef CONFIG_PROC_FS

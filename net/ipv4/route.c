@@ -2205,7 +2205,7 @@ static struct net_device *ip_rt_get_dev(struct net *net,
  *	2. IP spoofing attempts are filtered with 100% of guarantee.
  *	called with rcu_read_lock()
  */
-
+/* 在路由表中查找路由 */
 static int ip_route_input_slow(struct sk_buff *skb, __be32 daddr, __be32 saddr,
 			       u8 tos, struct net_device *dev,
 			       struct fib_result *res)

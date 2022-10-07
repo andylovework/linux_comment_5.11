@@ -235,7 +235,7 @@ static int ip_local_deliver_finish(struct net *net, struct sock *sk, struct sk_b
 }
 
 /*
- * 	Deliver IP Packets to the higher protocol layers.
+ * 	Deliver IP Packets to the higher protocol layers.本地包，并进行碎片重组
  */
 int ip_local_deliver(struct sk_buff *skb)
 {
@@ -411,7 +411,7 @@ drop_error:
 		__NET_INC_STATS(net, LINUX_MIB_IPRPFILTER);
 	goto drop;
 }
-
+/* 接收处理完成之前的一些操作 */
 static int ip_rcv_finish(struct net *net, struct sock *sk, struct sk_buff *skb)
 {
 	struct net_device *dev = skb->dev;
@@ -526,7 +526,7 @@ out:
 }
 
 /*
- * IP receive entry point
+ * IP receive entry point，进行IP包的校验
  */
 int ip_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt,
 	   struct net_device *orig_dev)

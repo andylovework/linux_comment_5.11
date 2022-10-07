@@ -5028,7 +5028,7 @@ EXPORT_SYMBOL(netif_rx_any_context);
 
 static __latent_entropy void net_tx_action(struct softirq_action *h)
 {
-	struct softnet_data *sd = this_cpu_ptr(&softnet_data);
+	struct softnet_data *sd = this_cpu_ptr(&softnet_data); /* 获取所在CPU的softnet_data */
 
 	if (sd->completion_queue) {
 		struct sk_buff *clist;
@@ -5083,12 +5083,9 @@ static __latent_entropy void net_tx_action(struct softirq_action *h)
 				spin_lock(root_lock);
 			} else if (unlikely(test_bit(__QDISC_STATE_DEACTIVATED,
 						     &q->state))) {
-				/* There is a synchronize_net() between
-				 * STATE_DEACTIVATED flag being set and
-				 * qdisc_reset()/some_qdisc_is_busy() in
-				 * dev_deactivate(), so we can safely bail out
-				 * early here to avoid data race between
-				 * qdisc_deactivate() and some_qdisc_is_busy()
+				/* There is a synchronize_net() between STATE_DEACTIVATED flag being set and
+				 * qdisc_reset()/some_qdisc_is_busy() in dev_deactivate(), so we can safely bail out
+				 * early here to avoid data race between qdisc_deactivate() and some_qdisc_is_busy()
 				 * for lockless qdisc.
 				 */
 				clear_bit(__QDISC_STATE_SCHED, &q->state);
@@ -10470,7 +10467,7 @@ int register_netdev(struct net_device *dev)
 
 	if (rtnl_lock_killable())
 		return -EINTR;
-	err = register_netdevice(dev);
+	err = register_netdevice(dev); /* 真正的注册流程 */
 	rtnl_unlock();
 	return err;
 }
@@ -11645,7 +11642,7 @@ static int __init net_dev_init(void)
 	int i, rc = -ENOMEM;
 
 	BUG_ON(!dev_boot_phase);
-
+    /* 注册接口层用于显示网络设备收发数据包统计信息 */
 	if (dev_proc_init())
 		goto out;
 
@@ -11654,9 +11651,9 @@ static int __init net_dev_init(void)
 
 	INIT_LIST_HEAD(&ptype_all);
 	for (i = 0; i < PTYPE_HASH_SIZE; i++)
-		INIT_LIST_HEAD(&ptype_base[i]);
+		INIT_LIST_HEAD(&ptype_base[i]); /* 初始化ptype_all链表和type_base散列表 */
 
-	INIT_LIST_HEAD(&offload_base);
+	INIT_LIST_HEAD(&offload_base); /* 初始化dev_name+head散列表，该散列表用来根据网络设备名获取网络设备 */
 
 	if (register_pernet_subsys(&netdev_net_ops))
 		goto out;
@@ -11704,7 +11701,7 @@ static int __init net_dev_init(void)
 
 	if (register_pernet_device(&default_device_ops))
 		goto out;
-
+    /* 注册网络报文输入输出软中断及其处理例程 */
 	open_softirq(NET_TX_SOFTIRQ, net_tx_action);
 	open_softirq(NET_RX_SOFTIRQ, net_rx_action);
 

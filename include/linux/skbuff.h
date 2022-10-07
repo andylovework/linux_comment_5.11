@@ -727,8 +727,7 @@ struct sk_buff {
 			union {
 				struct net_device	*dev; /* 一个网络设备，当skb为输出/输入时，dev表示输出/输入到的设备 */
 				/* Some protocols might use this space to store information,
-				 * while device pointer would be NULL.
-				 * UDP receive path is one user.
+				 * while device pointer would be NULL. UDP receive path is one user.
 				 */
 				unsigned long		dev_scratch;
 			};
@@ -738,7 +737,7 @@ struct sk_buff {
 	};
 
 	union {
-		struct sock		*sk;
+		struct sock		*sk; /* 收到此报文的网络设备（指定处理分组的网络设备） */
 		int			ip_defrag_offset;
 	};
 
@@ -752,7 +751,7 @@ struct sk_buff {
 	 * want to keep them across layers you have to do a skb_clone()
 	 * first. This is owned by whoever has the skb queued ATM.
 	 */
-	char			cb[48] __aligned(8);
+	char			cb[48] __aligned(8); /* 用于控制缓冲区 */
 
 	union {
 		struct {
@@ -768,10 +767,10 @@ struct sk_buff {
 #if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
 	unsigned long		 _nfct;
 #endif
-	unsigned int		len,
-				data_len;
-	__u16			mac_len,
-				hdr_len;
+	unsigned int len, /* 有效数据长度 */
+				data_len; /* 数据长度 */
+	__u16			mac_len, /* 连接层头部长度，对于以太网，指MAC地址用的长度，为6(MAC报文长度) */
+				hdr_len; /* skb的可写头部长度(用于clone时，表示clone的skb的头的长度) */
 
 	/* Following fields are _not_ copied in __copy_skb_header()
 	 * Note that queue_mapping is here mostly to fill a hole.
@@ -912,9 +911,9 @@ struct sk_buff {
 	__u16			inner_mac_header;
 
 	__be16			protocol;
-	__u16			transport_header;
-	__u16			network_header;
-	__u16			mac_header;
+	__u16			transport_header; /* 传输层的头部（指向四层帧头结构体指针） */
+	__u16			network_header; /* 网络层的头部(指向三层IP结构指针) */
+	__u16			mac_header; /* 链路层头部（指向二层MAC头） */
 
 #ifdef CONFIG_KCOV
 	u64			kcov_handle;
@@ -925,12 +924,12 @@ struct sk_buff {
 	/* public: */
 
 	/* These elements must be at the end, see alloc_skb() for details.  */
-	sk_buff_data_t		tail;
-	sk_buff_data_t		end;
-	unsigned char		*head,
-				*data;
-	unsigned int		truesize;
-	refcount_t		users;
+	sk_buff_data_t		tail; /* 数据的尾指针 */
+	sk_buff_data_t		end; /* 报文缓冲区的尾部 */
+	unsigned char		*head, /* 报文缓冲区的头 */
+				*data; /* 数据头指针 */
+	unsigned int		truesize; /* 报文缓冲区的大小 */
+	refcount_t		users; /* skb被克隆降引用的次数，在内存申请和克隆时会用到 */
 
 #ifdef CONFIG_SKB_EXTENSIONS
 	/* only useable after checking ->active_extensions != 0 */

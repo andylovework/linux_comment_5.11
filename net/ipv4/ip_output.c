@@ -307,7 +307,7 @@ static int __ip_finish_output(struct net *net, struct sock *sk, struct sk_buff *
 
 	return ip_finish_output2(net, sk, skb);
 }
-
+/* 发送数据到网卡 */
 static int ip_finish_output(struct net *net, struct sock *sk, struct sk_buff *skb)
 {
 	int ret;

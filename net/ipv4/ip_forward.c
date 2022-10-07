@@ -61,7 +61,7 @@ static bool ip_exceeds_mtu(const struct sk_buff *skb, unsigned int mtu)
 	return true;
 }
 
-
+/* 转发之前一些操作，主要是IP选项、碎片 */
 static int ip_forward_finish(struct net *net, struct sock *sk, struct sk_buff *skb)
 {
 	struct ip_options *opt	= &(IPCB(skb)->opt);
@@ -82,7 +82,7 @@ static int ip_forward_finish(struct net *net, struct sock *sk, struct sk_buff *s
 	skb->tstamp = 0;
 	return dst_output(net, sk, skb);
 }
-
+/* 转发数据，并处理TTL */
 int ip_forward(struct sk_buff *skb)
 {
 	u32 mtu;
